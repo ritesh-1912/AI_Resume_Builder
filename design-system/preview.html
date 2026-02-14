@@ -10,7 +10,7 @@
 </head>
 <body class="resume-app">
 
-  <nav class="resume-nav" role="navigation">
+  <nav class="resume-nav no-print" role="navigation">
     <a href="index.html" class="resume-nav__brand">AI Resume Builder</a>
     <ul class="resume-nav__links">
       <li><a href="builder.html">Builder</a></li>
@@ -20,12 +20,17 @@
   </nav>
 
   <main class="resume-preview-page">
-    <div class="template-tabs template-tabs--preview" role="tablist" aria-label="Resume template">
+    <div class="template-tabs template-tabs--preview no-print" role="tablist" aria-label="Resume template">
       <button type="button" class="template-tabs__btn" role="tab" data-template="classic" aria-selected="true">Classic</button>
       <button type="button" class="template-tabs__btn" role="tab" data-template="modern" aria-selected="false">Modern</button>
       <button type="button" class="template-tabs__btn" role="tab" data-template="minimal" aria-selected="false">Minimal</button>
     </div>
-    <div id="preview-content"></div>
+    <div class="preview-export-actions no-print">
+      <button type="button" class="kn-btn kn-btn--primary" id="btn-print-pdf">Print / Save as PDF</button>
+      <button type="button" class="kn-btn kn-btn--secondary" id="btn-copy-text">Copy Resume as Text</button>
+      <p class="preview-export-warning" id="export-warning" aria-live="polite" hidden></p>
+    </div>
+    <div id="preview-content" class="preview-print-area"></div>
   </main>
 
   <script src="resume-app.js"></script>
@@ -54,6 +59,32 @@
           b.classList.toggle('template-tabs__btn--active', b.getAttribute('data-template') === current);
           b.setAttribute('aria-selected', b.getAttribute('data-template') === current ? 'true' : 'false');
         });
+
+        function updateExportWarning() {
+          var msg = RA.getExportValidationWarning(RA.getResumeData());
+          var el = document.getElementById('export-warning');
+          if (el) {
+            el.textContent = msg || '';
+            el.hidden = !msg;
+          }
+        }
+        updateExportWarning();
+
+        document.getElementById('btn-print-pdf').onclick = function () {
+          updateExportWarning();
+          window.print();
+        };
+
+        document.getElementById('btn-copy-text').onclick = function () {
+          updateExportWarning();
+          var text = RA.getResumeAsPlainText(RA.getResumeData());
+          navigator.clipboard.writeText(text).then(function () {
+            var btn = document.getElementById('btn-copy-text');
+            var orig = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(function () { btn.textContent = orig; }, 2000);
+          }).catch(function () {});
+        };
       }
     })();
   </script>

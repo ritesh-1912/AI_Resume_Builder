@@ -91,3 +91,18 @@ Suggestions are derived from missing rules; max 3 shown.
 - With empty or partial resume, **Expected:** Up to 3 items such as: “Add at least 2 projects.”, “Add measurable impact (numbers) in bullets.”, “Expand summary (target 40+ words).”, “Add more skills (target 8+).”, “Add experience (internship or project work).”
 - Add content (e.g. 2 projects, numbers in bullets, 40+ word summary, 8+ skills, 1 experience). **Expected:** Corresponding improvement items disappear; list shrinks or empties.
 - **Expected:** ATS score logic is unchanged; template switching does not change the score.
+
+---
+
+## 9. Export (Print / PDF and Copy as Text)
+
+- On **Preview** page, **Expected:** Two buttons: “Print / Save as PDF” and “Copy Resume as Text”.
+- **Print / Save as PDF:** Click the button. **Expected:** Browser print dialog opens. In print preview (or when printing): only the resume content is shown; nav, template tabs, and export buttons are hidden. Resume uses white background, black/gray text only, no colored accents. Margins and spacing look consistent; sections and items avoid splitting across pages where possible.
+- **Copy Resume as Text:** Click the button. **Expected:** Plain text is copied to the clipboard in this order: Name, Contact, Summary, Education, Experience, Projects, Skills, Links. Paste into a text editor to confirm structure. Button briefly shows “Copied!”.
+- **Validation warning:** If name is missing **or** (no projects **and** no experience), a calm message appears above or near the buttons: “Your resume may look incomplete.” Export is **not** blocked; user can still Print or Copy.
+
+---
+
+## 10. Layout precision
+
+- On **Preview**, with a full resume: **Expected:** No section overlapping another; consistent vertical spacing between sections and items; long lines wrap and do not overflow (no horizontal scroll). Print output respects the same (no cut-off sections, clean margins).

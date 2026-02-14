@@ -394,6 +394,47 @@ textarea.kn-input {
   text-decoration: underline;
 }
 
+/* ─── Preview export actions (screen only) ─── */
+.preview-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--kn-space-2);
+  margin-bottom: var(--kn-space-3);
+}
+
+.preview-export-actions .kn-btn {
+  font-size: 0.875rem;
+}
+
+.preview-export-warning {
+  width: 100%;
+  margin: var(--kn-space-1) 0 0;
+  font-size: 0.875rem;
+  color: var(--kn-text);
+  opacity: 0.85;
+}
+
+/* ─── Layout precision: no overlap, consistent spacing, no overflow ─── */
+.resume-preview-page__inner {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.resume-preview-page__section {
+  break-inside: avoid;
+}
+
+.resume-preview-page__item {
+  break-inside: avoid;
+}
+
+.resume-preview-page__item-desc {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  max-width: 100%;
+}
+
 /* ─── Proof placeholder ─── */
 .resume-proof-page {
   flex: 1;
@@ -624,4 +665,63 @@ textarea.kn-input {
 
 .resume-builder__toolbar .kn-btn--secondary {
   font-size: 0.875rem;
+}
+
+/* ─── Print: hide UI, resume only, B&W, clean margins ─── */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body.resume-app,
+  .resume-preview-page,
+  .preview-print-area,
+  .preview-print-area .resume-preview-page__inner {
+    background: #fff !important;
+    color: #111 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .resume-preview-page {
+    padding: 0 !important;
+  }
+
+  .preview-print-area {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0.5in 0.75in !important;
+  }
+
+  .preview-print-area .resume-preview-page__name,
+  .preview-print-area .resume-preview-page__section-title,
+  .preview-print-area .resume-preview-page__item-title {
+    color: #111 !important;
+  }
+
+  .preview-print-area .resume-preview-page__contact,
+  .preview-print-area .resume-preview-page__item-meta,
+  .preview-print-area .resume-preview-page__item-desc {
+    color: #333 !important;
+  }
+
+  .preview-print-area .resume-preview-page__section {
+    margin-bottom: 1rem !important;
+    page-break-inside: avoid;
+  }
+
+  .preview-print-area .resume-preview-page__item {
+    page-break-inside: avoid;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .preview-print-area .resume-preview-page__section-title {
+    border-bottom-color: #111 !important;
+  }
+
+  a {
+    color: #111 !important;
+  }
 }

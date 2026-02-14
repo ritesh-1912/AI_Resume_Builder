@@ -262,6 +262,81 @@
     container.innerHTML = html;
   }
 
+  /**
+   * Plain-text version for copy. Sections: Name, Contact, Summary, Education, Experience, Projects, Skills, Links.
+   */
+  function getResumeAsPlainText(data) {
+    var d = data || getResumeData();
+    var p = d.personal || {};
+    var lines = [];
+    var name = (p.name || '').trim() || 'Your Name';
+    lines.push(name);
+    var contactParts = [p.email, p.phone, p.location].filter(Boolean).map(function (s) { return s.trim(); });
+    if (contactParts.length) lines.push(contactParts.join(' · '));
+    lines.push('');
+
+    if ((d.summary || '').trim()) {
+      lines.push('Summary');
+      lines.push((d.summary || '').trim());
+      lines.push('');
+    }
+
+    if (d.education && d.education.length) {
+      lines.push('Education');
+      d.education.forEach(function (e) {
+        var parts = [e.degree, e.school, e.location, e.year].filter(Boolean).map(function (s) { return (s || '').trim(); }).filter(Boolean);
+        if (parts.length) lines.push(parts.join(' · '));
+      });
+      lines.push('');
+    }
+
+    if (d.experience && d.experience.length) {
+      lines.push('Experience');
+      d.experience.forEach(function (e) {
+        lines.push((e.title || '') + (e.company ? ' — ' + e.company : '') + (e.period ? ' · ' + e.period : ''));
+        if ((e.description || '').trim()) lines.push((e.description || '').trim());
+      });
+      lines.push('');
+    }
+
+    if (d.projects && d.projects.length) {
+      lines.push('Projects');
+      d.projects.forEach(function (e) {
+        if ((e.name || '').trim()) lines.push(e.name);
+        if ((e.description || '').trim()) lines.push((e.description || '').trim());
+      });
+      lines.push('');
+    }
+
+    if ((d.skills || '').trim()) {
+      lines.push('Skills');
+      lines.push((d.skills || '').trim());
+      lines.push('');
+    }
+
+    var links = d.links || {};
+    if ((links.github || '').trim() || (links.linkedin || '').trim()) {
+      lines.push('Links');
+      if ((links.github || '').trim()) lines.push('GitHub: ' + (links.github || '').trim());
+      if ((links.linkedin || '').trim()) lines.push('LinkedIn: ' + (links.linkedin || '').trim());
+    }
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Returns warning message if name missing or (no project and no experience). Does not block export.
+   */
+  function getExportValidationWarning(data) {
+    var d = data || getResumeData();
+    var p = d.personal || {};
+    var hasName = !!((p.name || '').trim());
+    var hasProject = d.projects && d.projects.length > 0;
+    var hasExperience = d.experience && d.experience.length > 0;
+    if (!hasName || (!hasProject && !hasExperience)) return 'Your resume may look incomplete.';
+    return null;
+  }
+
   function renderPreviewPage(container) {
     if (!container) return;
     var d = getResumeData();
@@ -344,6 +419,8 @@
     getTopImprovements: getTopImprovements,
     getBulletGuidance: getBulletGuidance,
     computeATSScore: computeATSScore,
+    getResumeAsPlainText: getResumeAsPlainText,
+    getExportValidationWarning: getExportValidationWarning,
     renderLivePreview: renderLivePreview,
     renderPreviewPage: renderPreviewPage,
     escapeHtml: escapeHtml
