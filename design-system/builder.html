@@ -60,7 +60,7 @@
 
       <div class="resume-form-section">
         <h2 class="resume-form-section__title">Projects</h2>
-        <ul class="resume-entries" id="projects-list"></ul>
+        <div id="projects-list"></div>
         <div class="resume-form-actions">
           <button type="button" class="kn-btn kn-btn--secondary" id="add-project">+ Add Project</button>
         </div>
@@ -68,7 +68,10 @@
 
       <div class="resume-form-section">
         <h2 class="resume-form-section__title">Skills</h2>
-        <input type="text" class="kn-input" id="skills" placeholder="Comma-separated, e.g. JavaScript, React, Node.js">
+        <div id="skills-section"></div>
+        <div class="resume-form-actions" style="margin-top: var(--kn-space-2);">
+          <button type="button" class="kn-btn kn-btn--secondary" id="suggest-skills-btn">✨ Suggest Skills</button>
+        </div>
       </div>
 
       <div class="resume-form-section">
@@ -121,7 +124,7 @@
         data.personal.phone = (document.getElementById('personal-phone') && document.getElementById('personal-phone').value) || '';
         data.personal.location = (document.getElementById('personal-location') && document.getElementById('personal-location').value) || '';
         data.summary = (document.getElementById('summary') && document.getElementById('summary').value) || '';
-        data.skills = (document.getElementById('skills') && document.getElementById('skills').value) || '';
+        data.skills = getSkillsFromForm();
         data.links.github = (document.getElementById('link-github') && document.getElementById('link-github').value) || '';
         data.links.linkedin = (document.getElementById('link-linkedin') && document.getElementById('link-linkedin').value) || '';
         data.education = getEducationFromForm();
@@ -157,13 +160,39 @@
         return items;
       }
 
+      function getSkillsFromForm() {
+        function getPills(containerId) {
+          var el = document.getElementById(containerId);
+          if (!el) return [];
+          var pills = el.querySelectorAll('.skill-pill');
+          var arr = [];
+          pills.forEach(function (p) {
+            var t = (p.getAttribute('data-skill') || p.textContent || '').replace(/\s*×\s*$/, '').trim();
+            if (t) arr.push(t);
+          });
+          return arr;
+        }
+        return {
+          technical: getPills('skills-technical-pills'),
+          softSkills: getPills('skills-soft-pills'),
+          tools: getPills('skills-tools-pills')
+        };
+      }
+
       function getProjectsFromForm() {
         var items = [];
-        document.querySelectorAll('#projects-list .resume-entry').forEach(function (el) {
+        document.querySelectorAll('#projects-list .project-accordion').forEach(function (el) {
+          var techStack = [];
+          (el.querySelectorAll('.proj-tech-pill') || []).forEach(function (p) {
+            var t = (p.getAttribute('data-tech') || p.textContent || '').replace(/\s*×\s*$/, '').trim();
+            if (t) techStack.push(t);
+          });
           items.push({
             name: (el.querySelector('.proj-name') && el.querySelector('.proj-name').value) || '',
             description: (el.querySelector('.proj-desc') && el.querySelector('.proj-desc').value) || '',
-            link: (el.querySelector('.proj-link') && el.querySelector('.proj-link').value) || ''
+            techStack: techStack,
+            liveUrl: (el.querySelector('.proj-live-url') && el.querySelector('.proj-live-url').value) || '',
+            githubUrl: (el.querySelector('.proj-github-url') && el.querySelector('.proj-github-url').value) || ''
           });
         });
         return items;
@@ -176,11 +205,11 @@
         setVal('personal-phone', p.phone);
         setVal('personal-location', p.location);
         setVal('summary', data.summary || '');
-        setVal('skills', data.skills || '');
         setVal('link-github', (data.links && data.links.github) || '');
         setVal('link-linkedin', (data.links && data.links.linkedin) || '');
         renderEducationList(data.education || []);
         renderExperienceList(data.experience || []);
+        renderSkillsSection(data.skills || { technical: [], softSkills: [], tools: [] });
         renderProjectsList(data.projects || []);
       }
 
@@ -245,29 +274,162 @@
         sync();
       }
 
+      function renderSkillsSection(skills) {
+        var section = document.getElementById('skills-section');
+        if (!section) return;
+        var sk = skills && typeof skills === 'object' ? skills : { technical: [], softSkills: [], tools: [] };
+        var categories = [
+          { id: 'technical', label: 'Technical Skills', key: 'technical', pillsId: 'skills-technical-pills', inputId: 'skills-technical-input' },
+          { id: 'soft', label: 'Soft Skills', key: 'softSkills', pillsId: 'skills-soft-pills', inputId: 'skills-soft-input' },
+          { id: 'tools', label: 'Tools & Technologies', key: 'tools', pillsId: 'skills-tools-pills', inputId: 'skills-tools-input' }
+        ];
+        section.innerHTML = categories.map(function (cat) {
+          var arr = sk[cat.key] || [];
+          var pillsHtml = arr.map(function (s) { return '<span class="skill-pill" data-skill="' + RA.escapeHtml(s) + '">' + RA.escapeHtml(s) + ' <button type="button" class="skill-pill-remove" aria-label="Remove">×</button></span>'; }).join('');
+          return '<div class="skill-group"><span class="skill-group__label">' + RA.escapeHtml(cat.label) + ' (' + arr.length + ')</span>' +
+            '<div class="skill-tag-row"><input type="text" class="kn-input skill-tag-input" id="' + cat.inputId + '" data-category="' + cat.key + '" placeholder="Type skill and press Enter" maxlength="80">' +
+            '</div><div class="skill-pills" id="' + cat.pillsId + '">' + pillsHtml + '</div></div>';
+        }).join('');
+        categories.forEach(function (cat) {
+          var input = document.getElementById(cat.inputId);
+          var pillsEl = document.getElementById(cat.pillsId);
+          if (input) {
+            input.onkeydown = function (e) {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                var val = (input.value || '').trim();
+                if (!val) return;
+                var data = getDataFromForm();
+                var arr = (data.skills && data.skills[cat.key]) ? data.skills[cat.key].slice() : [];
+                if (arr.indexOf(val) === -1) arr.push(val);
+                data.skills = data.skills || { technical: [], softSkills: [], tools: [] };
+                data.skills[cat.key] = arr;
+                RA.setResumeData(data);
+                renderSkillsSection(data.skills);
+                sync();
+                input.value = '';
+              }
+            };
+          }
+          if (pillsEl) {
+            pillsEl.querySelectorAll('.skill-pill-remove').forEach(function (btn) {
+              btn.onclick = function () {
+                var pill = btn.closest('.skill-pill');
+                var skill = pill ? (pill.getAttribute('data-skill') || pill.textContent.replace(/\s*×\s*$/, '').trim()) : '';
+                if (!skill) return;
+                var data = getDataFromForm();
+                var arr = ((data.skills && data.skills[cat.key]) ? data.skills[cat.key] : []).filter(function (s) { return s !== skill; });
+                data.skills = data.skills || { technical: [], softSkills: [], tools: [] };
+                data.skills[cat.key] = arr;
+                RA.setResumeData(data);
+                renderSkillsSection(data.skills);
+                sync();
+              };
+            });
+          }
+        });
+      }
+
       function renderProjectsList(items) {
         var list = document.getElementById('projects-list');
         if (!list) return;
         list.innerHTML = '';
-        (items.length ? items : [{ name: '', description: '', link: '' }]).forEach(function (e) {
-          var li = document.createElement('li');
-          li.className = 'resume-entry';
-          li.innerHTML = '<div class="resume-entry__row resume-entry__row--full"><input type="text" class="kn-input proj-name" placeholder="Project name"></div>' +
-            '<div class="resume-entry__row resume-entry__row--full"><textarea class="kn-input proj-desc" placeholder="Description (one bullet per line)" rows="2"></textarea><div class="bullet-guidance" aria-live="polite"></div></div>' +
-            '<div class="resume-entry__row resume-entry__row--full"><input type="url" class="kn-input proj-link" placeholder="Link (optional)"></div>' +
-            '<div class="resume-entry__actions"><button type="button" class="kn-btn kn-btn--secondary remove-proj">Remove</button></div>';
-          li.querySelector('.proj-name').value = e.name || '';
-          li.querySelector('.proj-desc').value = e.description || '';
-          li.querySelector('.proj-link').value = e.link || '';
-          list.appendChild(li);
+        (items.length ? items : [{ name: '', description: '', techStack: [], liveUrl: '', githubUrl: '' }]).forEach(function (e, idx) {
+          var techPills = (e.techStack || []).map(function (t) { return '<span class="skill-pill proj-tech-pill" data-tech="' + RA.escapeHtml(t) + '">' + RA.escapeHtml(t) + ' <button type="button" class="skill-pill-remove" aria-label="Remove">×</button></span>'; }).join('');
+          var title = (e.name || '').trim() || 'New project';
+          var div = document.createElement('div');
+          div.className = 'project-accordion';
+          div.innerHTML = '<details class="project-accordion__details" open="' + (idx === 0 ? 'open' : '') + '">' +
+            '<summary class="project-accordion__header">' + RA.escapeHtml(title) + '</summary>' +
+            '<div class="project-accordion__body">' +
+            '<div class="resume-entry__row resume-entry__row--full"><input type="text" class="kn-input proj-name" placeholder="Project title" value="' + RA.escapeHtml(e.name || '') + '"></div>' +
+            '<div class="resume-entry__row resume-entry__row--full"><label class="form-label">Description <span class="desc-char-count">0/200</span></label><textarea class="kn-input proj-desc" placeholder="Description (max 200 chars)" rows="2" maxlength="200"></textarea><div class="bullet-guidance" aria-live="polite"></div></div>' +
+            '<div class="resume-entry__row resume-entry__row--full"><label class="form-label">Tech stack</label><input type="text" class="kn-input proj-tech-input" placeholder="Type and press Enter" maxlength="60"><div class="skill-pills proj-tech-pills" id="proj-tech-pills-' + idx + '">' + techPills + '</div></div>' +
+            '<div class="resume-entry__row resume-entry__row--full"><input type="url" class="kn-input proj-live-url" placeholder="Live URL (optional)" value="' + RA.escapeHtml(e.liveUrl || '') + '"></div>' +
+            '<div class="resume-entry__row resume-entry__row--full"><input type="url" class="kn-input proj-github-url" placeholder="GitHub URL (optional)" value="' + RA.escapeHtml(e.githubUrl || '') + '"></div>' +
+            '<div class="resume-entry__actions"><button type="button" class="kn-btn kn-btn--secondary remove-proj">Delete project</button></div>' +
+            '</div></details>';
+          var nameInput = div.querySelector('.proj-name');
+          var descInput = div.querySelector('.proj-desc');
+          if (nameInput) nameInput.value = e.name || '';
+          if (descInput) {
+            descInput.value = (e.description || '').slice(0, 200);
+            var updateCount = function () { var c = descInput.closest('.project-accordion').querySelector('.desc-char-count'); if (c) c.textContent = descInput.value.length + '/200'; };
+            updateCount();
+            descInput.oninput = function () { updateCount(); sync(); };
+          }
+          if (nameInput) {
+            nameInput.oninput = function () {
+              sync();
+              var sum = div.querySelector('summary');
+              if (sum) sum.textContent = (nameInput.value || '').trim() || 'New project';
+            };
+          }
+          div.querySelectorAll('.skill-pill-remove').forEach(function (btn) {
+            btn.onclick = function () {
+              var pill = btn.closest('.proj-tech-pill');
+              if (!pill) return;
+              var tech = pill.getAttribute('data-tech') || pill.textContent.replace(/\s*×\s*$/, '').trim();
+              var items = getProjectsFromForm();
+              var proj = items[idx] || {};
+              proj.techStack = (proj.techStack || []).filter(function (t) { return t !== tech; });
+              items[idx] = proj;
+              var data = getDataFromForm();
+              data.projects = items;
+              RA.setResumeData(data);
+              renderProjectsList(data.projects);
+              sync();
+            };
+          });
+          var techInput = div.querySelector('.proj-tech-input');
+          if (techInput) {
+            techInput.onkeydown = function (ev) {
+              if (ev.key === 'Enter') {
+                ev.preventDefault();
+                var val = (techInput.value || '').trim();
+                if (!val) return;
+                var items = getProjectsFromForm();
+                var proj = items[idx] || { name: '', description: '', techStack: [], liveUrl: '', githubUrl: '' };
+                proj.techStack = proj.techStack || [];
+                if (proj.techStack.indexOf(val) === -1) proj.techStack.push(val);
+                items[idx] = proj;
+                var data = getDataFromForm();
+                data.projects = items;
+                RA.setResumeData(data);
+                renderProjectsList(data.projects);
+                sync();
+                techInput.value = '';
+              }
+            };
+          }
+          div.querySelector('.remove-proj').onclick = function () {
+            var items = getProjectsFromForm();
+            if (items.length <= 1) return;
+            items.splice(idx, 1);
+            var data = getDataFromForm();
+            data.projects = items;
+            RA.setResumeData(data);
+            renderProjectsList(data.projects);
+            sync();
+          };
+          list.appendChild(div);
         });
-        bindListEvents('projects-list', '.remove-proj', renderProjectsList, getProjectsFromForm, addProjectRow);
+        list.querySelectorAll('.proj-name, .proj-desc, .proj-live-url, .proj-github-url').forEach(function (el) {
+          el.oninput = sync;
+        });
+        list.querySelectorAll('summary').forEach(function (s) {
+          s.onclick = function () { setTimeout(function () { sync(); }, 0); };
+        });
+        updateBulletGuidance();
       }
 
       function addProjectRow() {
         var items = getProjectsFromForm();
-        items.push({ name: '', description: '', link: '' });
-        renderProjectsList(items);
+        items.push({ name: '', description: '', techStack: [], liveUrl: '', githubUrl: '' });
+        var data = getDataFromForm();
+        data.projects = items;
+        RA.setResumeData(data);
+        renderProjectsList(data.projects);
         sync();
       }
 
@@ -362,6 +524,30 @@
       document.getElementById('add-education').onclick = addEducationRow;
       document.getElementById('add-experience').onclick = addExperienceRow;
       document.getElementById('add-project').onclick = addProjectRow;
+
+      document.getElementById('suggest-skills-btn').onclick = function () {
+        var btn = document.getElementById('suggest-skills-btn');
+        btn.disabled = true;
+        btn.textContent = 'Loading...';
+        setTimeout(function () {
+          var suggested = RA.getSuggestedSkills();
+          var data = getDataFromForm();
+          data.skills = data.skills || { technical: [], softSkills: [], tools: [] };
+          ['technical', 'softSkills', 'tools'].forEach(function (key) {
+            var current = data.skills[key] || [];
+            var add = suggested[key] || [];
+            add.forEach(function (s) {
+              if (current.indexOf(s) === -1) current.push(s);
+            });
+            data.skills[key] = current;
+          });
+          RA.setResumeData(data);
+          renderSkillsSection(data.skills);
+          sync();
+          btn.disabled = false;
+          btn.textContent = '✨ Suggest Skills';
+        }, 1000);
+      };
 
       ['personal-name', 'personal-email', 'personal-phone', 'personal-location', 'summary', 'skills', 'link-github', 'link-linkedin'].forEach(function (id) {
         var el = document.getElementById(id);

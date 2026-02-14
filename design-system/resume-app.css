@@ -305,6 +305,169 @@ textarea.kn-input {
   font-style: italic;
 }
 
+.resume-live-preview__card {
+  margin-bottom: var(--kn-space-2);
+  padding: var(--kn-space-2);
+  border: var(--kn-border-width) solid var(--kn-border);
+  border-radius: var(--kn-radius);
+  background: var(--kn-background);
+}
+
+.resume-live-preview__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kn-space-1);
+  margin-top: var(--kn-space-1);
+}
+
+.resume-live-preview__pill {
+  display: inline-block;
+  padding: 2px var(--kn-space-1);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: var(--kn-radius);
+  border: var(--kn-border-width) solid var(--kn-border);
+  background: var(--kn-background);
+  color: var(--kn-text);
+}
+
+.resume-live-preview__skill-group {
+  margin-bottom: var(--kn-space-2);
+}
+
+.resume-live-preview__skill-group-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--kn-text);
+  margin-bottom: var(--kn-space-1);
+}
+
+.resume-live-preview__links {
+  margin-top: var(--kn-space-1);
+  display: flex;
+  gap: var(--kn-space-1);
+}
+
+.resume-live-preview__link-icon {
+  font-size: 0.875rem;
+  color: var(--kn-text);
+  opacity: 0.8;
+  text-decoration: none;
+}
+
+/* ─── Skills form: groups, tag input, pills ─── */
+.skill-group {
+  margin-bottom: var(--kn-space-3);
+}
+
+.skill-group__label {
+  display: block;
+  font-size: var(--kn-body-size);
+  font-weight: 600;
+  color: var(--kn-text);
+  margin-bottom: var(--kn-space-1);
+}
+
+.skill-tag-row {
+  margin-bottom: var(--kn-space-1);
+}
+
+.skill-tag-input {
+  font-size: 0.875rem;
+}
+
+.skill-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kn-space-1);
+  min-height: 24px;
+}
+
+.skill-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px var(--kn-space-1);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: var(--kn-radius);
+  border: var(--kn-border-width) solid var(--kn-border);
+  background: var(--kn-background);
+  color: var(--kn-text);
+}
+
+.skill-pill-remove {
+  padding: 0 2px;
+  font-size: 1rem;
+  line-height: 1;
+  background: none;
+  border: none;
+  color: var(--kn-text);
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.skill-pill-remove:hover {
+  opacity: 1;
+  color: var(--kn-accent);
+}
+
+/* ─── Project accordion ─── */
+.project-accordion {
+  margin-bottom: var(--kn-space-2);
+  border: var(--kn-border-width) solid var(--kn-border);
+  border-radius: var(--kn-radius);
+  background: var(--kn-background);
+}
+
+.project-accordion__details {
+  padding: 0;
+}
+
+.project-accordion__header {
+  padding: var(--kn-space-2) var(--kn-space-3);
+  font-weight: 600;
+  font-size: var(--kn-body-size);
+  color: var(--kn-text);
+  cursor: pointer;
+  list-style: none;
+}
+
+.project-accordion__header::-webkit-details-marker {
+  display: none;
+}
+
+.project-accordion__header::before {
+  content: "▸ ";
+  display: inline-block;
+  width: 1em;
+}
+
+.project-accordion__details[open] .project-accordion__header::before {
+  content: "▾ ";
+}
+
+.project-accordion__body {
+  padding: 0 var(--kn-space-3) var(--kn-space-3);
+  border-top: var(--kn-border-width) solid var(--kn-border);
+}
+
+.project-accordion__body .resume-entry__row {
+  margin-bottom: var(--kn-space-2);
+}
+
+.project-accordion__body .skill-pills {
+  margin-top: var(--kn-space-1);
+}
+
+.desc-char-count {
+  font-size: 0.75rem;
+  color: var(--kn-text);
+  opacity: 0.7;
+  margin-left: var(--kn-space-1);
+}
+
 /* ─── Preview page (full resume, B&W) ─── */
 .resume-preview-page {
   flex: 1;
@@ -376,6 +539,60 @@ textarea.kn-input {
   margin: 0;
   font-size: 10pt;
   color: #333;
+}
+
+.resume-preview-page__card {
+  margin-bottom: var(--kn-space-2);
+  padding: var(--kn-space-2);
+  border: 1px solid #ddd;
+  border-radius: var(--kn-radius);
+  background: #fafafa;
+}
+
+.resume-preview-page__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.resume-preview-page__pill {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 9pt;
+  font-weight: 500;
+  border-radius: var(--kn-radius);
+  border: 1px solid #111;
+  background: #fff;
+  color: #111;
+}
+
+.resume-preview-page__skill-group {
+  margin-bottom: var(--kn-space-2);
+}
+
+.resume-preview-page__skill-group-label {
+  display: block;
+  font-size: 9pt;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 4px;
+}
+
+.resume-preview-page__links {
+  margin-top: 6px;
+  display: flex;
+  gap: 8px;
+}
+
+.resume-preview-page__link-icon {
+  font-size: 10pt;
+  color: #111;
+  text-decoration: none;
+}
+
+.resume-preview-page__link-icon:hover {
+  text-decoration: underline;
 }
 
 .resume-preview-page__empty {

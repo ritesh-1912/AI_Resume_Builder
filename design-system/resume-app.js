@@ -40,7 +40,10 @@
     if (!hasNumber) out.push('Add measurable impact (numbers) in bullets.');
     var summaryWords = (d.summary || '').trim().split(/\s+/).filter(Boolean).length;
     if (summaryWords < 40) out.push('Expand summary (target 40+ words).');
-    var skillsCount = (d.skills || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean).length;
+    var skillsCount = 0;
+    if (d.skills && typeof d.skills === 'object') {
+      skillsCount = (d.skills.technical || []).length + (d.skills.softSkills || []).length + (d.skills.tools || []).length;
+    }
     if (skillsCount < 8) out.push('Add more skills (target 8+).');
     var expCount = (d.experience && d.experience.length) || 0;
     if (expCount < 1) out.push('Add experience (internship or project work).');
@@ -71,7 +74,7 @@
       education: [],
       experience: [],
       projects: [],
-      skills: '',
+      skills: { technical: [], softSkills: [], tools: [] },
       links: { github: '', linkedin: '' }
     };
   }
@@ -93,12 +96,34 @@
         { title: 'Software Engineer', company: 'Startup Inc', location: 'Oakland, CA', period: '2018 – 2020', description: 'Built customer dashboard and internal tools. React, TypeScript, Node.' }
       ],
       projects: [
-        { name: 'Design System', description: 'Component library and tokens. Used across 4 product teams.', link: '' },
-        { name: 'Resume Builder', description: 'Side project: structured resume editor with live preview.', link: 'https://github.com/example' }
+        { name: 'Design System', description: 'Component library and tokens. Used across 4 product teams.', techStack: ['React', 'TypeScript'], liveUrl: '', githubUrl: 'https://github.com/example/design-system' },
+        { name: 'Resume Builder', description: 'Side project: structured resume editor with live preview.', techStack: ['React', 'Node.js'], liveUrl: 'https://resume-demo.example.com', githubUrl: 'https://github.com/example' }
       ],
-      skills: 'JavaScript, TypeScript, React, Node.js, CSS, REST APIs, Figma',
+      skills: {
+        technical: ['JavaScript', 'TypeScript', 'React', 'Node.js', 'PostgreSQL', 'GraphQL'],
+        softSkills: ['Team Leadership', 'Problem Solving'],
+        tools: ['Git', 'Docker', 'AWS', 'Figma']
+      },
       links: { github: 'https://github.com/jordanchen', linkedin: 'https://linkedin.com/in/jordanchen' }
     };
+  }
+
+  function normalizeResumeData(data) {
+    if (!data) return getEmptyResume();
+    if (typeof data.skills === 'string') {
+      var arr = (data.skills || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+      data.skills = { technical: arr.slice(), softSkills: [], tools: [] };
+    }
+    if (!data.skills || !data.skills.technical) data.skills = data.skills || { technical: [], softSkills: [], tools: [] };
+    if (!Array.isArray(data.skills.technical)) data.skills.technical = [];
+    if (!Array.isArray(data.skills.softSkills)) data.skills.softSkills = [];
+    if (!Array.isArray(data.skills.tools)) data.skills.tools = [];
+    (data.projects || []).forEach(function (p) {
+      if (!Array.isArray(p.techStack)) p.techStack = [];
+      if (p.liveUrl === undefined) p.liveUrl = '';
+      if (p.githubUrl === undefined) p.githubUrl = (p.link || '');
+    });
+    return data;
   }
 
   function getResumeData() {
@@ -106,7 +131,7 @@
       var raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         var data = JSON.parse(raw);
-        return data;
+        return normalizeResumeData(data);
       }
     } catch (e) {}
     return getEmptyResume();
@@ -114,6 +139,14 @@
 
   function setResumeData(data) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function getSuggestedSkills() {
+    return {
+      technical: ['TypeScript', 'React', 'Node.js', 'PostgreSQL', 'GraphQL'],
+      softSkills: ['Team Leadership', 'Problem Solving'],
+      tools: ['Git', 'Docker', 'AWS']
+    };
   }
 
   /**
@@ -139,8 +172,11 @@
     if (expCount >= 1) score += 10;
     else suggestions.push('Add at least one experience entry.');
 
-    var skillsList = (d.skills || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
-    if (skillsList.length >= 8) score += 10;
+    var skillsCount = 0;
+    if (d.skills && typeof d.skills === 'object') {
+      skillsCount = (d.skills.technical || []).length + (d.skills.softSkills || []).length + (d.skills.tools || []).length;
+    }
+    if (skillsCount >= 8) score += 10;
     else suggestions.push('Add more skills (target 8+).');
 
     var hasLink = !!((d.links && (d.links.github || '').trim()) || (d.links && (d.links.linkedin || '').trim()));
@@ -234,18 +270,46 @@
       html += '<div class="resume-live-preview__section"><h2 class="resume-live-preview__section-title">Projects</h2>';
       d.projects.forEach(function (e) {
         if ((e.name || '').trim() || (e.description || '').trim()) {
-          html += '<div class="resume-live-preview__item">';
+          html += '<div class="resume-live-preview__card">';
           html += '<div class="resume-live-preview__item-title">' + escapeHtml(e.name || '') + '</div>';
           if ((e.description || '').trim()) html += '<p class="resume-live-preview__item-desc">' + escapeHtml(e.description) + '</p>';
+          if (e.techStack && e.techStack.length) {
+            html += '<div class="resume-live-preview__pills">';
+            e.techStack.forEach(function (t) { html += '<span class="resume-live-preview__pill">' + escapeHtml(t) + '</span>'; });
+            html += '</div>';
+          }
+          if ((e.liveUrl || '').trim() || (e.githubUrl || '').trim()) {
+            html += '<div class="resume-live-preview__links">';
+            if ((e.liveUrl || '').trim()) html += '<span class="resume-live-preview__link-icon" title="Live">&#128279;</span>';
+            if ((e.githubUrl || '').trim()) html += '<span class="resume-live-preview__link-icon" title="GitHub">&#128279;</span>';
+            html += '</div>';
+          }
           html += '</div>';
         }
       });
       html += '</div>';
     }
 
-    if ((d.skills || '').trim()) {
+    var sk = d.skills && typeof d.skills === 'object' ? d.skills : { technical: [], softSkills: [], tools: [] };
+    var hasAnySkills = (sk.technical && sk.technical.length) || (sk.softSkills && sk.softSkills.length) || (sk.tools && sk.tools.length);
+    if (hasAnySkills) {
       html += '<div class="resume-live-preview__section"><h2 class="resume-live-preview__section-title">Skills</h2>';
-      html += '<div class="resume-live-preview__section-body">' + escapeHtml(d.skills) + '</div></div>';
+      if (sk.technical && sk.technical.length) {
+        html += '<div class="resume-live-preview__skill-group"><span class="resume-live-preview__skill-group-label">Technical Skills</span><div class="resume-live-preview__pills">';
+        sk.technical.forEach(function (t) { html += '<span class="resume-live-preview__pill">' + escapeHtml(t) + '</span>'; });
+        html += '</div></div>';
+      }
+      if (sk.softSkills && sk.softSkills.length) {
+        html += '<div class="resume-live-preview__skill-group"><span class="resume-live-preview__skill-group-label">Soft Skills</span><div class="resume-live-preview__pills">';
+        sk.softSkills.forEach(function (t) { html += '<span class="resume-live-preview__pill">' + escapeHtml(t) + '</span>'; });
+        html += '</div></div>';
+      }
+      if (sk.tools && sk.tools.length) {
+        html += '<div class="resume-live-preview__skill-group"><span class="resume-live-preview__skill-group-label">Tools & Technologies</span><div class="resume-live-preview__pills">';
+        sk.tools.forEach(function (t) { html += '<span class="resume-live-preview__pill">' + escapeHtml(t) + '</span>'; });
+        html += '</div></div>';
+      }
+      html += '</div>';
     }
 
     var links = d.links || {};
@@ -304,13 +368,17 @@
       d.projects.forEach(function (e) {
         if ((e.name || '').trim()) lines.push(e.name);
         if ((e.description || '').trim()) lines.push((e.description || '').trim());
+        if (e.techStack && e.techStack.length) lines.push(e.techStack.join(', '));
       });
       lines.push('');
     }
 
-    if ((d.skills || '').trim()) {
+    var sk = d.skills && typeof d.skills === 'object' ? d.skills : { technical: [], softSkills: [], tools: [] };
+    if ((sk.technical && sk.technical.length) || (sk.softSkills && sk.softSkills.length) || (sk.tools && sk.tools.length)) {
       lines.push('Skills');
-      lines.push((d.skills || '').trim());
+      if (sk.technical && sk.technical.length) lines.push('Technical: ' + sk.technical.join(', '));
+      if (sk.softSkills && sk.softSkills.length) lines.push('Soft: ' + sk.softSkills.join(', '));
+      if (sk.tools && sk.tools.length) lines.push('Tools: ' + sk.tools.join(', '));
       lines.push('');
     }
 
@@ -384,17 +452,45 @@
     if (d.projects && d.projects.length) {
       html += '<div class="resume-preview-page__section"><h2 class="resume-preview-page__section-title">Projects</h2><div class="resume-preview-page__section-body">';
       d.projects.forEach(function (e) {
-        html += '<div class="resume-preview-page__item">';
+        html += '<div class="resume-preview-page__card">';
         html += '<div class="resume-preview-page__item-title">' + escapeHtml(e.name || '') + '</div>';
         if ((e.description || '').trim()) html += '<p class="resume-preview-page__item-desc">' + escapeHtml(e.description) + '</p>';
+        if (e.techStack && e.techStack.length) {
+          html += '<div class="resume-preview-page__pills">';
+          e.techStack.forEach(function (t) { html += '<span class="resume-preview-page__pill">' + escapeHtml(t) + '</span>'; });
+          html += '</div>';
+        }
+        if ((e.liveUrl || '').trim() || (e.githubUrl || '').trim()) {
+          html += '<div class="resume-preview-page__links">';
+          if ((e.liveUrl || '').trim()) html += '<a href="' + escapeHtml(e.liveUrl) + '" target="_blank" rel="noopener" class="resume-preview-page__link-icon" title="Live">&#128279;</a>';
+          if ((e.githubUrl || '').trim()) html += '<a href="' + escapeHtml(e.githubUrl) + '" target="_blank" rel="noopener" class="resume-preview-page__link-icon" title="GitHub">&#128279;</a>';
+          html += '</div>';
+        }
         html += '</div>';
       });
       html += '</div></div>';
     }
 
-    if ((d.skills || '').trim()) {
-      html += '<div class="resume-preview-page__section"><h2 class="resume-preview-page__section-title">Skills</h2>';
-      html += '<div class="resume-preview-page__section-body">' + escapeHtml(d.skills) + '</div></div>';
+    var sk = d.skills && typeof d.skills === 'object' ? d.skills : { technical: [], softSkills: [], tools: [] };
+    var hasAnySkills = (sk.technical && sk.technical.length) || (sk.softSkills && sk.softSkills.length) || (sk.tools && sk.tools.length);
+    if (hasAnySkills) {
+      html += '<div class="resume-preview-page__section"><h2 class="resume-preview-page__section-title">Skills</h2><div class="resume-preview-page__section-body">';
+      if (sk.technical && sk.technical.length) {
+        html += '<div class="resume-preview-page__skill-group"><span class="resume-preview-page__skill-group-label">Technical Skills</span><div class="resume-preview-page__pills">';
+        sk.technical.forEach(function (t) { html += '<span class="resume-preview-page__pill">' + escapeHtml(t) + '</span>'; });
+        html += '</div></div>';
+      }
+      if (sk.softSkills && sk.softSkills.length) {
+        html += '<div class="resume-preview-page__skill-group"><span class="resume-preview-page__skill-group-label">Soft Skills</span><div class="resume-preview-page__pills">';
+        sk.softSkills.forEach(function (t) { html += '<span class="resume-preview-page__pill">' + escapeHtml(t) + '</span>'; });
+        html += '</div></div>';
+      }
+      if (sk.tools && sk.tools.length) {
+        html += '<div class="resume-preview-page__skill-group"><span class="resume-preview-page__skill-group-label">Tools & Technologies</span><div class="resume-preview-page__pills">';
+        sk.tools.forEach(function (t) { html += '<span class="resume-preview-page__pill">' + escapeHtml(t) + '</span>'; });
+        html += '</div></div>';
+      }
+      html += '</div></div>';
     }
 
     var links = d.links || {};
@@ -421,6 +517,8 @@
     computeATSScore: computeATSScore,
     getResumeAsPlainText: getResumeAsPlainText,
     getExportValidationWarning: getExportValidationWarning,
+    getSuggestedSkills: getSuggestedSkills,
+    normalizeResumeData: normalizeResumeData,
     renderLivePreview: renderLivePreview,
     renderPreviewPage: renderPreviewPage,
     escapeHtml: escapeHtml
