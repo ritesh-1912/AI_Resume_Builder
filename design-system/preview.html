@@ -144,6 +144,31 @@
         }
       }
 
+      var CHECKLIST_KEY = 'rb_checklist';
+
+      function loadChecklist() {
+        try {
+          var raw = localStorage.getItem(CHECKLIST_KEY);
+          var arr = raw ? JSON.parse(raw) : [];
+          var cbs = document.querySelectorAll('.test-checklist__cb');
+          for (var i = 0; i < cbs.length; i++) {
+            cbs[i].checked = !!arr[i];
+          }
+        } catch (e) {}
+      }
+
+      function saveChecklist() {
+        var cbs = document.querySelectorAll('.test-checklist__cb');
+        var arr = [];
+        for (var i = 0; i < cbs.length; i++) arr.push(cbs[i].checked);
+        try { localStorage.setItem(CHECKLIST_KEY, JSON.stringify(arr)); } catch (e) {}
+      }
+
+      loadChecklist();
+      document.querySelectorAll('.test-checklist__cb').forEach(function (cb) {
+        cb.addEventListener('change', saveChecklist);
+      });
+
       applyTemplate(RA.getTemplate());
       applyTheme(RA.getThemeColor());
       updateATSPreview();

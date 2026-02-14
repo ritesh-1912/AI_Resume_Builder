@@ -49,30 +49,43 @@
           <p class="form-hint" id="error-github" hidden>Enter a valid URL (https://...).</p>
         </div>
         <div class="form-group">
-          <label class="form-label" for="artifact-deployed">Deployed URL (Vercel or equivalent)</label>
+          <label class="form-label" for="artifact-deployed">Deployed URL</label>
           <input type="url" id="artifact-deployed" class="kn-input" placeholder="https://..." autocomplete="off">
           <p class="form-hint" id="error-deployed" hidden>Enter a valid URL (https://...).</p>
         </div>
       </div>
     </section>
 
+    <!-- Completion message (only when shipped) -->
+    <div class="rb-proof-shipped" id="proof-shipped-message" hidden aria-live="polite">
+      <p class="rb-proof-shipped__text">Project 3 Shipped Successfully.</p>
+    </div>
+
     <!-- C) Actions -->
     <div class="rb-proof-actions">
       <button type="button" class="kn-btn kn-btn--primary" id="proof-copy-btn">Copy Final Submission</button>
       <a href="01-problem.html" class="kn-btn kn-btn--secondary">&larr; Back to Steps</a>
     </div>
+
+    <details class="rb-proof-verify">
+      <summary class="rb-proof-verify__summary">Verification steps</summary>
+      <ul class="rb-proof-verify__list">
+        <li><strong>Shipped logic:</strong> Badge shows &quot;Shipped&quot; only when all 8 steps are completed, all 10 checklist tests (Preview page) are checked, and all 3 proof links are valid. Otherwise &quot;In Progress&quot; or &quot;Not Started&quot;.</li>
+        <li><strong>Proof validation:</strong> Lovable, GitHub, and Deployed URL must be valid URLs (https/http). Invalid fields show an error; Copy is disabled until all three are valid.</li>
+        <li><strong>Copy format:</strong> &quot;Copy Final Submission&quot; copies the exact block with Lovable Project, GitHub Repository, Live Deployment, and Core Capabilities list. Data is stored in <code>rb_final_submission</code>.</li>
+      </ul>
+    </details>
   </main>
 
   <script src="../rb-engine.js"></script>
   <script>
     (function () {
       var RB = window.RBEngine;
-      var LINKS_KEY = 'rb_proof_links';
+      var SUBMISSION_KEY = RB.FINAL_SUBMISSION_KEY || 'rb_final_submission';
 
-      /* ─── Load saved links ─── */
       function getLinks() {
         try {
-          var raw = localStorage.getItem(LINKS_KEY);
+          var raw = localStorage.getItem(SUBMISSION_KEY);
           return raw ? JSON.parse(raw) : { lovable: '', github: '', deployed: '' };
         } catch (e) {
           return { lovable: '', github: '', deployed: '' };
@@ -80,10 +93,9 @@
       }
 
       function setLinks(data) {
-        localStorage.setItem(LINKS_KEY, JSON.stringify(data));
+        localStorage.setItem(SUBMISSION_KEY, JSON.stringify(data));
       }
 
-      /* ─── Update step status list ─── */
       function updateStepStatuses() {
         for (var i = 1; i <= RB.TOTAL_STEPS; i++) {
           var el = document.querySelector('.rb-proof-step__status[data-step="' + i + '"]');
@@ -94,7 +106,6 @@
         }
       }
 
-      /* ─── Update top bar badge ─── */
       function updateBadge() {
         var badge = document.getElementById('proof-badge');
         if (!badge) return;
@@ -103,10 +114,16 @@
         badge.className = 'kn-badge kn-badge--' + status;
       }
 
-      /* ─── Save & validate individual field ─── */
+      function updateShippedMessage() {
+        var status = RB.computeStatus();
+        var el = document.getElementById('proof-shipped-message');
+        if (el) el.hidden = status !== 'shipped';
+      }
+
       function saveAndValidate(inputId, key) {
         var input = document.getElementById(inputId);
-        var err = document.getElementById('error-' + inputId.replace('artifact-', ''));
+        var errId = 'error-' + inputId.replace('artifact-', '');
+        var err = document.getElementById(errId);
         var value = (input.value || '').trim();
         var valid = !value || RB.isValidUrl(value);
         if (err) err.hidden = valid;
@@ -114,40 +131,30 @@
         var links = getLinks();
         links[key] = value;
         setLinks(links);
+        updateBadge();
+        updateShippedMessage();
       }
 
-      /* ─── Build submission text ─── */
       function buildSubmissionText() {
         var links = getLinks();
-        var stepsCompleted = 0;
-        for (var i = 1; i <= RB.TOTAL_STEPS; i++) {
-          if (RB.isStepComplete(i)) stepsCompleted++;
-        }
         return [
           '------------------------------------------',
           'AI Resume Builder — Final Submission',
-          'Project 3 — Build Track',
           '',
-          'Steps Completed: ' + stepsCompleted + ' / ' + RB.TOTAL_STEPS,
+          'Lovable Project: ' + ((links.lovable || '').trim() || ''),
+          'GitHub Repository: ' + ((links.github || '').trim() || ''),
+          'Live Deployment: ' + ((links.deployed || '').trim() || ''),
           '',
-          'Lovable Project: ' + ((links.lovable || '').trim() || '(not provided)'),
-          'GitHub Repository: ' + ((links.github || '').trim() || '(not provided)'),
-          'Live Deployment: ' + ((links.deployed || '').trim() || '(not provided)'),
-          '',
-          'Build Steps:',
-          '  1. Define the Problem',
-          '  2. Market Research',
-          '  3. System Architecture',
-          '  4. High-Level Design',
-          '  5. Low-Level Design',
-          '  6. Build',
-          '  7. Test',
-          '  8. Ship',
+          'Core Capabilities:',
+          '- Structured resume builder',
+          '- Deterministic ATS scoring',
+          '- Template switching',
+          '- PDF export with clean formatting',
+          '- Persistence + validation checklist',
           '------------------------------------------'
         ].join('\n');
       }
 
-      /* ─── Event bindings ─── */
       document.getElementById('artifact-lovable').addEventListener('blur', function () {
         saveAndValidate('artifact-lovable', 'lovable');
       });
@@ -165,7 +172,7 @@
 
         var links = getLinks();
         if (!RB.isValidUrl(links.lovable) || !RB.isValidUrl(links.github) || !RB.isValidUrl(links.deployed)) {
-          alert('Please fill and validate all three links first.');
+          alert('Please provide and validate all three links (Lovable, GitHub, Deployed URL).');
           return;
         }
 
@@ -178,7 +185,6 @@
         }).catch(function () {});
       });
 
-      /* ─── Init ─── */
       var links = getLinks();
       document.getElementById('artifact-lovable').value = links.lovable || '';
       document.getElementById('artifact-github').value = links.github || '';
@@ -186,6 +192,7 @@
 
       updateStepStatuses();
       updateBadge();
+      updateShippedMessage();
     })();
   </script>
 </body>

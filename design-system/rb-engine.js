@@ -49,13 +49,35 @@
     localStorage.setItem(artifactKey(stepNum), JSON.stringify(data));
   }
 
+  var FINAL_SUBMISSION_KEY = 'rb_final_submission';
+  var CHECKLIST_KEY = 'rb_checklist';
+
   function getProofLinks() {
     try {
-      var raw = localStorage.getItem('rb_proof_links');
+      var raw = localStorage.getItem(FINAL_SUBMISSION_KEY);
+      if (!raw) raw = localStorage.getItem('rb_proof_links');
       return raw ? JSON.parse(raw) : { lovable: '', github: '', deployed: '' };
     } catch (e) {
       return { lovable: '', github: '', deployed: '' };
     }
+  }
+
+  /** All 10 checklist items must be checked for "shipped". Do not bypass. */
+  function getChecklistPassed() {
+    try {
+      var raw = localStorage.getItem(CHECKLIST_KEY);
+      if (!raw) return false;
+      var arr = JSON.parse(raw);
+      if (!Array.isArray(arr) || arr.length !== 10) return false;
+      return arr.every(Boolean);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function allProofLinksValid() {
+    var links = getProofLinks();
+    return isValidUrl(links.lovable) && isValidUrl(links.github) && isValidUrl(links.deployed);
   }
 
   function isValidUrl(s) {
@@ -85,14 +107,17 @@
 
   /* ═══════════════════════════════════════════
    * Compute overall status badge
+   * Shipped ONLY IF: all 8 steps complete, all 10 checklist passed, all 3 proof links provided.
    * ═══════════════════════════════════════════ */
   function computeStatus() {
     var completed = 0;
     for (var i = 1; i <= TOTAL_STEPS; i++) {
       if (isStepComplete(i)) completed++;
     }
+    var checklistOk = getChecklistPassed();
+    var linksOk = allProofLinksValid();
+    if (completed === TOTAL_STEPS && checklistOk && linksOk) return 'shipped';
     if (completed === 0) return 'not-started';
-    if (completed === TOTAL_STEPS) return 'shipped';
     return 'progress';
   }
 
@@ -351,12 +376,16 @@
     TOTAL_STEPS: TOTAL_STEPS,
     PROJECT_NAME: PROJECT_NAME,
     PROJECT_LABEL: PROJECT_LABEL,
+    FINAL_SUBMISSION_KEY: FINAL_SUBMISSION_KEY,
+    CHECKLIST_KEY: CHECKLIST_KEY,
     getArtifact: getArtifact,
     isStepComplete: isStepComplete,
     canAccessStep: canAccessStep,
     computeStatus: computeStatus,
     statusLabel: statusLabel,
     getProofLinks: getProofLinks,
+    getChecklistPassed: getChecklistPassed,
+    allProofLinksValid: allProofLinksValid,
     isValidUrl: isValidUrl,
     escapeHtml: escapeHtml
   };

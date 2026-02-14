@@ -358,6 +358,54 @@
   flex-wrap: wrap;
 }
 
+.rb-proof-shipped {
+  margin-top: var(--kn-space-4);
+  padding: var(--kn-space-4);
+  text-align: center;
+  background: var(--kn-surface);
+  border-radius: var(--kn-radius);
+  border: 1px solid var(--kn-border);
+}
+
+.rb-proof-shipped__text {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--kn-text);
+  letter-spacing: 0.02em;
+}
+
+.rb-proof-verify {
+  margin-top: var(--kn-space-4);
+  padding: var(--kn-space-2);
+  border: 1px solid var(--kn-border);
+  border-radius: var(--kn-radius);
+  background: var(--kn-surface);
+}
+
+.rb-proof-verify__summary {
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--kn-text);
+  font-size: 0.875rem;
+}
+
+.rb-proof-verify__list {
+  margin: var(--kn-space-2) 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.8125rem;
+  color: var(--kn-text);
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.rb-proof-verify__list code {
+  font-size: 0.75em;
+  padding: 1px 4px;
+  background: var(--kn-background);
+  border-radius: 2px;
+}
+
 /* ─── Landing page ─── */
 .rb-landing {
   max-width: var(--kn-body-max-width);
