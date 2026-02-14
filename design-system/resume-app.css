@@ -421,6 +421,70 @@ textarea.kn-input {
   margin: 0;
 }
 
+/* ─── ATS Score block (builder right column) ─── */
+.ats-block {
+  margin-bottom: var(--kn-space-4);
+  padding: var(--kn-space-3);
+  border: var(--kn-border-width) solid var(--kn-border);
+  border-radius: var(--kn-radius);
+  background: var(--kn-background);
+}
+
+.ats-score__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--kn-text);
+  margin: 0 0 var(--kn-space-2);
+}
+
+.ats-score__meter-wrap {
+  height: 8px;
+  background: var(--kn-border);
+  border-radius: var(--kn-radius);
+  overflow: hidden;
+  margin-bottom: var(--kn-space-1);
+}
+
+.ats-score__meter {
+  height: 100%;
+  background: var(--kn-accent);
+  border-radius: var(--kn-radius);
+  transition: width var(--kn-transition);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.ats-score__value {
+  font-size: 0.8125rem;
+  color: var(--kn-text);
+  opacity: 0.85;
+  margin: 0 0 var(--kn-space-2);
+}
+
+.ats-suggestions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--kn-text);
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+.ats-suggestions__item {
+  padding: var(--kn-space-1) 0;
+  padding-left: 1em;
+  position: relative;
+}
+
+.ats-suggestions__item::before {
+  content: "·";
+  position: absolute;
+  left: 0;
+  color: var(--kn-accent);
+  font-weight: 600;
+}
+
 /* ─── Load sample button ─── */
 .resume-builder__toolbar {
   margin-bottom: var(--kn-space-3);

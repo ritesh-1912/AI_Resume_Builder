@@ -83,6 +83,14 @@
     </div>
 
     <aside class="resume-builder__preview">
+      <div class="ats-block" id="ats-block">
+        <p class="ats-score__label">ATS Readiness Score</p>
+        <div class="ats-score__meter-wrap">
+          <div class="ats-score__meter" id="ats-meter" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <p class="ats-score__value"><span id="ats-score-value">0</span>/100</p>
+        <ul class="ats-suggestions" id="ats-suggestions" aria-label="Suggestions to improve ATS score"></ul>
+      </div>
       <div id="live-preview"></div>
     </aside>
   </div>
@@ -270,10 +278,30 @@
         });
       }
 
+      function updateATS(data) {
+        var result = RA.computeATSScore(data);
+        var score = result.score;
+        var suggestions = result.suggestions || [];
+        var valueEl = document.getElementById('ats-score-value');
+        var meterEl = document.getElementById('ats-meter');
+        var listEl = document.getElementById('ats-suggestions');
+        if (valueEl) valueEl.textContent = score;
+        if (meterEl) {
+          meterEl.style.width = score + '%';
+          meterEl.setAttribute('aria-valuenow', score);
+        }
+        if (listEl) {
+          listEl.innerHTML = suggestions.map(function (s) {
+            return '<li class="ats-suggestions__item">' + RA.escapeHtml(s) + '</li>';
+          }).join('');
+        }
+      }
+
       function sync() {
         var data = getDataFromForm();
         RA.setResumeData(data);
         RA.renderLivePreview(data, previewEl);
+        updateATS(data);
       }
 
       document.getElementById('add-education').onclick = addEducationRow;
@@ -290,10 +318,13 @@
         RA.setResumeData(sample);
         setFormFromData(sample);
         RA.renderLivePreview(sample, previewEl);
+        updateATS(sample);
       };
 
-      setFormFromData(RA.getResumeData());
-      RA.renderLivePreview(RA.getResumeData(), previewEl);
+      var initialData = RA.getResumeData();
+      setFormFromData(initialData);
+      RA.renderLivePreview(initialData, previewEl);
+      updateATS(initialData);
     })();
   </script>
 </body>
