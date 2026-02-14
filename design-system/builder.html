@@ -86,10 +86,29 @@
     </div>
 
     <aside class="resume-builder__preview">
-      <div class="template-tabs" role="tablist" aria-label="Resume template">
-        <button type="button" class="template-tabs__btn" role="tab" data-template="classic" aria-selected="true">Classic</button>
-        <button type="button" class="template-tabs__btn" role="tab" data-template="modern" aria-selected="false">Modern</button>
-        <button type="button" class="template-tabs__btn" role="tab" data-template="minimal" aria-selected="false">Minimal</button>
+      <div class="template-picker" role="tablist" aria-label="Resume template">
+        <button type="button" class="template-picker__thumb template-picker__thumb--classic" role="tab" data-template="classic" aria-selected="true" title="Classic">
+          <span class="template-picker__sketch"></span>
+          <span class="template-picker__label">Classic</span>
+          <span class="template-picker__check" aria-hidden="true">✓</span>
+        </button>
+        <button type="button" class="template-picker__thumb template-picker__thumb--modern" role="tab" data-template="modern" aria-selected="false" title="Modern">
+          <span class="template-picker__sketch"></span>
+          <span class="template-picker__label">Modern</span>
+          <span class="template-picker__check" aria-hidden="true">✓</span>
+        </button>
+        <button type="button" class="template-picker__thumb template-picker__thumb--minimal" role="tab" data-template="minimal" aria-selected="false" title="Minimal">
+          <span class="template-picker__sketch"></span>
+          <span class="template-picker__label">Minimal</span>
+          <span class="template-picker__check" aria-hidden="true">✓</span>
+        </button>
+      </div>
+      <div class="color-theme-picker" aria-label="Accent color">
+        <button type="button" class="color-theme-picker__swatch" data-color="teal" title="Teal" style="background: hsl(168, 60%, 40%);"><span class="color-theme-picker__check" aria-hidden="true">✓</span></button>
+        <button type="button" class="color-theme-picker__swatch" data-color="navy" title="Navy" style="background: hsl(220, 60%, 35%);"><span class="color-theme-picker__check" aria-hidden="true">✓</span></button>
+        <button type="button" class="color-theme-picker__swatch" data-color="burgundy" title="Burgundy" style="background: hsl(345, 60%, 35%);"><span class="color-theme-picker__check" aria-hidden="true">✓</span></button>
+        <button type="button" class="color-theme-picker__swatch" data-color="forest" title="Forest" style="background: hsl(150, 50%, 30%);"><span class="color-theme-picker__check" aria-hidden="true">✓</span></button>
+        <button type="button" class="color-theme-picker__swatch" data-color="charcoal" title="Charcoal" style="background: hsl(0, 0%, 25%);"><span class="color-theme-picker__check" aria-hidden="true">✓</span></button>
       </div>
       <div class="ats-block" id="ats-block">
         <p class="ats-score__label">ATS Readiness Score</p>
@@ -505,10 +524,19 @@
       function applyTemplate(key) {
         var wrap = document.getElementById('live-preview-wrap');
         if (wrap) wrap.setAttribute('data-template', key);
-        document.querySelectorAll('.template-tabs__btn').forEach(function (btn) {
+        document.querySelectorAll('.template-picker__thumb').forEach(function (btn) {
           var isSelected = btn.getAttribute('data-template') === key;
-          btn.classList.toggle('template-tabs__btn--active', isSelected);
+          btn.classList.toggle('template-picker__thumb--active', isSelected);
           btn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        });
+        RA.renderLivePreview(RA.getResumeData(), previewEl);
+      }
+
+      function applyTheme(colorKey) {
+        var wrap = document.getElementById('live-preview-wrap');
+        if (wrap) wrap.style.setProperty('--resume-accent', RA.getThemeColorHsl(colorKey));
+        document.querySelectorAll('.color-theme-picker__swatch').forEach(function (btn) {
+          btn.classList.toggle('color-theme-picker__swatch--active', btn.getAttribute('data-color') === colorKey);
         });
       }
 
@@ -564,7 +592,7 @@
         updateBulletGuidance();
       };
 
-      document.querySelectorAll('.template-tabs__btn').forEach(function (btn) {
+      document.querySelectorAll('.template-picker__thumb').forEach(function (btn) {
         btn.onclick = function () {
           var key = btn.getAttribute('data-template');
           if (!key) return;
@@ -573,10 +601,19 @@
         };
       });
 
+      document.querySelectorAll('.color-theme-picker__swatch').forEach(function (btn) {
+        btn.onclick = function () {
+          var colorKey = btn.getAttribute('data-color');
+          if (!colorKey) return;
+          RA.setThemeColor(colorKey);
+          applyTheme(colorKey);
+        };
+      });
+
       var initialData = RA.getResumeData();
       setFormFromData(initialData);
-      RA.renderLivePreview(initialData, previewEl);
       applyTemplate(RA.getTemplate());
+      applyTheme(RA.getThemeColor());
       updateATS(initialData);
       updateImprovements(initialData);
       updateBulletGuidance();

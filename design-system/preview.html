@@ -20,17 +20,37 @@
   </nav>
 
   <main class="resume-preview-page">
-    <div class="template-tabs template-tabs--preview no-print" role="tablist" aria-label="Resume template">
-      <button type="button" class="template-tabs__btn" role="tab" data-template="classic" aria-selected="true">Classic</button>
-      <button type="button" class="template-tabs__btn" role="tab" data-template="modern" aria-selected="false">Modern</button>
-      <button type="button" class="template-tabs__btn" role="tab" data-template="minimal" aria-selected="false">Minimal</button>
+    <div class="template-picker template-picker--preview no-print" role="tablist" aria-label="Resume template">
+      <button type="button" class="template-picker__thumb template-picker__thumb--classic" role="tab" data-template="classic" aria-selected="true" title="Classic">
+        <span class="template-picker__sketch"></span>
+        <span class="template-picker__label">Classic</span>
+        <span class="template-picker__check" aria-hidden="true">✓</span>
+      </button>
+      <button type="button" class="template-picker__thumb template-picker__thumb--modern" role="tab" data-template="modern" aria-selected="false" title="Modern">
+        <span class="template-picker__sketch"></span>
+        <span class="template-picker__label">Modern</span>
+        <span class="template-picker__check" aria-hidden="true">✓</span>
+      </button>
+      <button type="button" class="template-picker__thumb template-picker__thumb--minimal" role="tab" data-template="minimal" aria-selected="false" title="Minimal">
+        <span class="template-picker__sketch"></span>
+        <span class="template-picker__label">Minimal</span>
+        <span class="template-picker__check" aria-hidden="true">✓</span>
+      </button>
+    </div>
+    <div class="color-theme-picker color-theme-picker--preview no-print" aria-label="Accent color">
+      <button type="button" class="color-theme-picker__swatch" data-color="teal" title="Teal" style="background: hsl(168, 60%, 40%);"><span class="color-theme-picker__check" aria-hidden="true">✓</span></button>
+      <button type="button" class="color-theme-picker__swatch" data-color="navy" title="Navy" style="background: hsl(220, 60%, 35%);"><span class="color-theme-picker__check" aria-hidden="true">✓</span></button>
+      <button type="button" class="color-theme-picker__swatch" data-color="burgundy" title="Burgundy" style="background: hsl(345, 60%, 35%);"><span class="color-theme-picker__check" aria-hidden="true">✓</span></button>
+      <button type="button" class="color-theme-picker__swatch" data-color="forest" title="Forest" style="background: hsl(150, 50%, 30%);"><span class="color-theme-picker__check" aria-hidden="true">✓</span></button>
+      <button type="button" class="color-theme-picker__swatch" data-color="charcoal" title="Charcoal" style="background: hsl(0, 0%, 25%);"><span class="color-theme-picker__check" aria-hidden="true">✓</span></button>
     </div>
     <div class="preview-export-actions no-print">
-      <button type="button" class="kn-btn kn-btn--primary" id="btn-print-pdf">Print / Save as PDF</button>
+      <button type="button" class="kn-btn kn-btn--primary" id="btn-print-pdf">Download PDF</button>
       <button type="button" class="kn-btn kn-btn--secondary" id="btn-copy-text">Copy Resume as Text</button>
       <p class="preview-export-warning" id="export-warning" aria-live="polite" hidden></p>
     </div>
     <div id="preview-content" class="preview-print-area"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   </main>
 
   <script src="resume-app.js"></script>
@@ -38,54 +58,80 @@
     (function () {
       var RA = window.ResumeApp;
       var container = document.getElementById('preview-content');
-      if (RA && container) {
-        container.setAttribute('data-template', RA.getTemplate());
+      if (!RA || !container) return;
+
+      function applyTemplate(key) {
+        container.setAttribute('data-template', key);
+        document.querySelectorAll('.template-picker__thumb').forEach(function (b) {
+          var sel = b.getAttribute('data-template') === key;
+          b.classList.toggle('template-picker__thumb--active', sel);
+          b.setAttribute('aria-selected', sel ? 'true' : 'false');
+        });
         RA.renderPreviewPage(container);
-        document.querySelectorAll('.template-tabs__btn').forEach(function (btn) {
-          btn.onclick = function () {
-            var key = btn.getAttribute('data-template');
-            if (!key) return;
-            RA.setTemplate(key);
-            container.setAttribute('data-template', key);
-            document.querySelectorAll('.template-tabs__btn').forEach(function (b) {
-              var sel = b.getAttribute('data-template') === key;
-              b.classList.toggle('template-tabs__btn--active', sel);
-              b.setAttribute('aria-selected', sel ? 'true' : 'false');
-            });
-          };
-        });
-        var current = RA.getTemplate();
-        document.querySelectorAll('.template-tabs__btn').forEach(function (b) {
-          b.classList.toggle('template-tabs__btn--active', b.getAttribute('data-template') === current);
-          b.setAttribute('aria-selected', b.getAttribute('data-template') === current ? 'true' : 'false');
-        });
-
-        function updateExportWarning() {
-          var msg = RA.getExportValidationWarning(RA.getResumeData());
-          var el = document.getElementById('export-warning');
-          if (el) {
-            el.textContent = msg || '';
-            el.hidden = !msg;
-          }
-        }
-        updateExportWarning();
-
-        document.getElementById('btn-print-pdf').onclick = function () {
-          updateExportWarning();
-          window.print();
-        };
-
-        document.getElementById('btn-copy-text').onclick = function () {
-          updateExportWarning();
-          var text = RA.getResumeAsPlainText(RA.getResumeData());
-          navigator.clipboard.writeText(text).then(function () {
-            var btn = document.getElementById('btn-copy-text');
-            var orig = btn.textContent;
-            btn.textContent = 'Copied!';
-            setTimeout(function () { btn.textContent = orig; }, 2000);
-          }).catch(function () {});
-        };
       }
+
+      function applyTheme(colorKey) {
+        container.style.setProperty('--resume-accent', RA.getThemeColorHsl(colorKey));
+        document.querySelectorAll('.color-theme-picker__swatch').forEach(function (b) {
+          b.classList.toggle('color-theme-picker__swatch--active', b.getAttribute('data-color') === colorKey);
+        });
+      }
+
+      function showToast(message) {
+        var el = document.getElementById('toast');
+        if (!el) return;
+        el.textContent = message;
+        el.hidden = false;
+        setTimeout(function () { el.hidden = true; }, 3000);
+      }
+
+      applyTemplate(RA.getTemplate());
+      applyTheme(RA.getThemeColor());
+
+      document.querySelectorAll('.template-picker__thumb').forEach(function (btn) {
+        btn.onclick = function () {
+          var key = btn.getAttribute('data-template');
+          if (!key) return;
+          RA.setTemplate(key);
+          applyTemplate(key);
+        };
+      });
+
+      document.querySelectorAll('.color-theme-picker__swatch').forEach(function (btn) {
+        btn.onclick = function () {
+          var colorKey = btn.getAttribute('data-color');
+          if (!colorKey) return;
+          RA.setThemeColor(colorKey);
+          applyTheme(colorKey);
+        };
+      });
+
+      function updateExportWarning() {
+        var msg = RA.getExportValidationWarning(RA.getResumeData());
+        var el = document.getElementById('export-warning');
+        if (el) {
+          el.textContent = msg || '';
+          el.hidden = !msg;
+        }
+      }
+      updateExportWarning();
+
+      document.getElementById('btn-print-pdf').onclick = function () {
+        updateExportWarning();
+        showToast('PDF export ready! Check your downloads.');
+        window.print();
+      };
+
+      document.getElementById('btn-copy-text').onclick = function () {
+        updateExportWarning();
+        var text = RA.getResumeAsPlainText(RA.getResumeData());
+        navigator.clipboard.writeText(text).then(function () {
+          var btn = document.getElementById('btn-copy-text');
+          var orig = btn.textContent;
+          btn.textContent = 'Copied!';
+          setTimeout(function () { btn.textContent = orig; }, 2000);
+        }).catch(function () {});
+      };
     })();
   </script>
 </body>

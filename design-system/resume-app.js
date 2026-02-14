@@ -7,8 +7,17 @@
 
   var STORAGE_KEY = 'resumeBuilderData';
   var TEMPLATE_KEY = 'resumeBuilderTemplate';
+  var THEME_COLOR_KEY = 'resumeBuilderThemeColor';
   var ACTION_VERBS = /^(Built|Developed|Designed|Implemented|Led|Improved|Created|Optimized|Automated)\b/i;
   var NUMBER_RE = /\d|%|\b[kKmMxX]\b/;
+
+  var THEME_COLORS = {
+    teal: 'hsl(168, 60%, 40%)',
+    navy: 'hsl(220, 60%, 35%)',
+    burgundy: 'hsl(345, 60%, 35%)',
+    forest: 'hsl(150, 50%, 30%)',
+    charcoal: 'hsl(0, 0%, 25%)'
+  };
 
   function getTemplate() {
     try {
@@ -21,6 +30,23 @@
   function setTemplate(key) {
     if (key !== 'classic' && key !== 'modern' && key !== 'minimal') return;
     try { localStorage.setItem(TEMPLATE_KEY, key); } catch (e) {}
+  }
+
+  function getThemeColor() {
+    try {
+      var c = localStorage.getItem(THEME_COLOR_KEY);
+      if (THEME_COLORS[c]) return c;
+    } catch (e) {}
+    return 'teal';
+  }
+
+  function setThemeColor(key) {
+    if (!THEME_COLORS[key]) return;
+    try { localStorage.setItem(THEME_COLOR_KEY, key); } catch (e) {}
+  }
+
+  function getThemeColorHsl(key) {
+    return THEME_COLORS[key || getThemeColor()] || THEME_COLORS.teal;
   }
 
   /**
@@ -221,9 +247,54 @@
     var contactParts = [p.email, p.phone, p.location].filter(Boolean).map(function (s) { return s.trim(); });
     var contact = contactParts.join(' · ') || 'Email · Phone · Location';
 
-    var html = '<div class="resume-live-preview">';
-    html += '<h1 class="resume-live-preview__name">' + escapeHtml(name) + '</h1>';
-    html += '<p class="resume-live-preview__contact">' + escapeHtml(contact) + '</p>';
+    var template = getTemplate();
+    var isModern = template === 'modern';
+    var html;
+
+    if (isModern) {
+      html = '<div class="resume-live-preview resume-live-preview--modern">';
+      html += '<div class="resume-live-preview__sidebar">';
+      html += '<h1 class="resume-live-preview__name">' + escapeHtml(name) + '</h1>';
+      html += '<p class="resume-live-preview__contact">' + escapeHtml(contact) + '</p>';
+      var sk = d.skills && typeof d.skills === 'object' ? d.skills : { technical: [], softSkills: [], tools: [] };
+      var hasAnySkills = (sk.technical && sk.technical.length) || (sk.softSkills && sk.softSkills.length) || (sk.tools && sk.tools.length);
+      if (hasAnySkills) {
+        html += '<div class="resume-live-preview__section"><h2 class="resume-live-preview__section-title">Skills</h2>';
+        if (sk.technical && sk.technical.length) {
+          html += '<div class="resume-live-preview__skill-group"><span class="resume-live-preview__skill-group-label">Technical</span><div class="resume-live-preview__pills">';
+          sk.technical.forEach(function (t) { html += '<span class="resume-live-preview__pill">' + escapeHtml(t) + '</span>'; });
+          html += '</div></div>';
+        }
+        if (sk.softSkills && sk.softSkills.length) {
+          html += '<div class="resume-live-preview__skill-group"><span class="resume-live-preview__skill-group-label">Soft</span><div class="resume-live-preview__pills">';
+          sk.softSkills.forEach(function (t) { html += '<span class="resume-live-preview__pill">' + escapeHtml(t) + '</span>'; });
+          html += '</div></div>';
+        }
+        if (sk.tools && sk.tools.length) {
+          html += '<div class="resume-live-preview__skill-group"><span class="resume-live-preview__skill-group-label">Tools</span><div class="resume-live-preview__pills">';
+          sk.tools.forEach(function (t) { html += '<span class="resume-live-preview__pill">' + escapeHtml(t) + '</span>'; });
+          html += '</div></div>';
+        }
+        html += '</div>';
+      }
+      var links = d.links || {};
+      if ((links.github || '').trim() || (links.linkedin || '').trim()) {
+        var linkParts = [];
+        if ((links.github || '').trim()) linkParts.push('GitHub');
+        if ((links.linkedin || '').trim()) linkParts.push('LinkedIn');
+        html += '<div class="resume-live-preview__section"><h2 class="resume-live-preview__section-title">Links</h2>';
+        html += '<div class="resume-live-preview__section-body">' + linkParts.join(' · ') + '</div></div>';
+      }
+      html += '</div>';
+      html += '<div class="resume-live-preview__main">';
+    } else {
+      html = '<div class="resume-live-preview">';
+    }
+
+    if (!isModern) {
+      html += '<h1 class="resume-live-preview__name">' + escapeHtml(name) + '</h1>';
+      html += '<p class="resume-live-preview__contact">' + escapeHtml(contact) + '</p>';
+    }
 
     if ((d.summary || '').trim()) {
       html += '<div class="resume-live-preview__section">';
@@ -290,38 +361,40 @@
       html += '</div>';
     }
 
-    var sk = d.skills && typeof d.skills === 'object' ? d.skills : { technical: [], softSkills: [], tools: [] };
-    var hasAnySkills = (sk.technical && sk.technical.length) || (sk.softSkills && sk.softSkills.length) || (sk.tools && sk.tools.length);
-    if (hasAnySkills) {
-      html += '<div class="resume-live-preview__section"><h2 class="resume-live-preview__section-title">Skills</h2>';
-      if (sk.technical && sk.technical.length) {
-        html += '<div class="resume-live-preview__skill-group"><span class="resume-live-preview__skill-group-label">Technical Skills</span><div class="resume-live-preview__pills">';
-        sk.technical.forEach(function (t) { html += '<span class="resume-live-preview__pill">' + escapeHtml(t) + '</span>'; });
-        html += '</div></div>';
+    if (!isModern) {
+      var sk = d.skills && typeof d.skills === 'object' ? d.skills : { technical: [], softSkills: [], tools: [] };
+      var hasAnySkills = (sk.technical && sk.technical.length) || (sk.softSkills && sk.softSkills.length) || (sk.tools && sk.tools.length);
+      if (hasAnySkills) {
+        html += '<div class="resume-live-preview__section"><h2 class="resume-live-preview__section-title">Skills</h2>';
+        if (sk.technical && sk.technical.length) {
+          html += '<div class="resume-live-preview__skill-group"><span class="resume-live-preview__skill-group-label">Technical Skills</span><div class="resume-live-preview__pills">';
+          sk.technical.forEach(function (t) { html += '<span class="resume-live-preview__pill">' + escapeHtml(t) + '</span>'; });
+          html += '</div></div>';
+        }
+        if (sk.softSkills && sk.softSkills.length) {
+          html += '<div class="resume-live-preview__skill-group"><span class="resume-live-preview__skill-group-label">Soft Skills</span><div class="resume-live-preview__pills">';
+          sk.softSkills.forEach(function (t) { html += '<span class="resume-live-preview__pill">' + escapeHtml(t) + '</span>'; });
+          html += '</div></div>';
+        }
+        if (sk.tools && sk.tools.length) {
+          html += '<div class="resume-live-preview__skill-group"><span class="resume-live-preview__skill-group-label">Tools & Technologies</span><div class="resume-live-preview__pills">';
+          sk.tools.forEach(function (t) { html += '<span class="resume-live-preview__pill">' + escapeHtml(t) + '</span>'; });
+          html += '</div></div>';
+        }
+        html += '</div>';
       }
-      if (sk.softSkills && sk.softSkills.length) {
-        html += '<div class="resume-live-preview__skill-group"><span class="resume-live-preview__skill-group-label">Soft Skills</span><div class="resume-live-preview__pills">';
-        sk.softSkills.forEach(function (t) { html += '<span class="resume-live-preview__pill">' + escapeHtml(t) + '</span>'; });
-        html += '</div></div>';
+      var links = d.links || {};
+      var hasLinks = (links.github || '').trim() || (links.linkedin || '').trim();
+      if (hasLinks) {
+        var linkParts = [];
+        if ((links.github || '').trim()) linkParts.push('GitHub');
+        if ((links.linkedin || '').trim()) linkParts.push('LinkedIn');
+        html += '<div class="resume-live-preview__section"><h2 class="resume-live-preview__section-title">Links</h2>';
+        html += '<div class="resume-live-preview__section-body">' + linkParts.join(' · ') + '</div></div>';
       }
-      if (sk.tools && sk.tools.length) {
-        html += '<div class="resume-live-preview__skill-group"><span class="resume-live-preview__skill-group-label">Tools & Technologies</span><div class="resume-live-preview__pills">';
-        sk.tools.forEach(function (t) { html += '<span class="resume-live-preview__pill">' + escapeHtml(t) + '</span>'; });
-        html += '</div></div>';
-      }
-      html += '</div>';
     }
 
-    var links = d.links || {};
-    var hasLinks = (links.github || '').trim() || (links.linkedin || '').trim();
-    if (hasLinks) {
-      var linkParts = [];
-      if ((links.github || '').trim()) linkParts.push('GitHub');
-      if ((links.linkedin || '').trim()) linkParts.push('LinkedIn');
-      html += '<div class="resume-live-preview__section"><h2 class="resume-live-preview__section-title">Links</h2>';
-      html += '<div class="resume-live-preview__section-body">' + linkParts.join(' · ') + '</div></div>';
-    }
-
+    if (isModern) html += '</div>';
     html += '</div>';
     container.innerHTML = html;
   }
@@ -418,9 +491,49 @@
       return;
     }
 
-    var html = '<div class="resume-preview-page__inner">';
-    html += '<h1 class="resume-preview-page__name">' + (name ? escapeHtml(name) : 'Your Name') + '</h1>';
-    html += '<p class="resume-preview-page__contact">' + (contact ? escapeHtml(contact) : '') + '</p>';
+    var template = getTemplate();
+    var isModern = template === 'modern';
+    var html;
+
+    if (isModern) {
+      html = '<div class="resume-preview-page__inner resume-preview-page__inner--modern">';
+      html += '<div class="resume-preview-page__sidebar">';
+      html += '<h1 class="resume-preview-page__name">' + (name ? escapeHtml(name) : 'Your Name') + '</h1>';
+      html += '<p class="resume-preview-page__contact">' + (contact ? escapeHtml(contact) : '') + '</p>';
+      var sk = d.skills && typeof d.skills === 'object' ? d.skills : { technical: [], softSkills: [], tools: [] };
+      if ((sk.technical && sk.technical.length) || (sk.softSkills && sk.softSkills.length) || (sk.tools && sk.tools.length)) {
+        html += '<div class="resume-preview-page__section"><h2 class="resume-preview-page__section-title">Skills</h2><div class="resume-preview-page__section-body">';
+        if (sk.technical && sk.technical.length) {
+          html += '<div class="resume-preview-page__skill-group"><span class="resume-preview-page__skill-group-label">Technical</span><div class="resume-preview-page__pills">';
+          sk.technical.forEach(function (t) { html += '<span class="resume-preview-page__pill">' + escapeHtml(t) + '</span>'; });
+          html += '</div></div>';
+        }
+        if (sk.softSkills && sk.softSkills.length) {
+          html += '<div class="resume-preview-page__skill-group"><span class="resume-preview-page__skill-group-label">Soft</span><div class="resume-preview-page__pills">';
+          sk.softSkills.forEach(function (t) { html += '<span class="resume-preview-page__pill">' + escapeHtml(t) + '</span>'; });
+          html += '</div></div>';
+        }
+        if (sk.tools && sk.tools.length) {
+          html += '<div class="resume-preview-page__skill-group"><span class="resume-preview-page__skill-group-label">Tools</span><div class="resume-preview-page__pills">';
+          sk.tools.forEach(function (t) { html += '<span class="resume-preview-page__pill">' + escapeHtml(t) + '</span>'; });
+          html += '</div></div>';
+        }
+        html += '</div></div>';
+      }
+      var links = d.links || {};
+      if ((links.github || '').trim() || (links.linkedin || '').trim()) {
+        html += '<div class="resume-preview-page__section"><h2 class="resume-preview-page__section-title">Links</h2><div class="resume-preview-page__section-body">';
+        if ((links.github || '').trim()) html += 'GitHub · ';
+        if ((links.linkedin || '').trim()) html += 'LinkedIn';
+        html += '</div></div>';
+      }
+      html += '</div>';
+      html += '<div class="resume-preview-page__main">';
+    } else {
+      html = '<div class="resume-preview-page__inner">';
+      html += '<h1 class="resume-preview-page__name">' + (name ? escapeHtml(name) : 'Your Name') + '</h1>';
+      html += '<p class="resume-preview-page__contact">' + (contact ? escapeHtml(contact) : '') + '</p>';
+    }
 
     if ((d.summary || '').trim()) {
       html += '<div class="resume-preview-page__section"><h2 class="resume-preview-page__section-title">Summary</h2>';
@@ -471,36 +584,38 @@
       html += '</div></div>';
     }
 
-    var sk = d.skills && typeof d.skills === 'object' ? d.skills : { technical: [], softSkills: [], tools: [] };
-    var hasAnySkills = (sk.technical && sk.technical.length) || (sk.softSkills && sk.softSkills.length) || (sk.tools && sk.tools.length);
-    if (hasAnySkills) {
-      html += '<div class="resume-preview-page__section"><h2 class="resume-preview-page__section-title">Skills</h2><div class="resume-preview-page__section-body">';
-      if (sk.technical && sk.technical.length) {
-        html += '<div class="resume-preview-page__skill-group"><span class="resume-preview-page__skill-group-label">Technical Skills</span><div class="resume-preview-page__pills">';
-        sk.technical.forEach(function (t) { html += '<span class="resume-preview-page__pill">' + escapeHtml(t) + '</span>'; });
+    if (!isModern) {
+      var sk = d.skills && typeof d.skills === 'object' ? d.skills : { technical: [], softSkills: [], tools: [] };
+      var hasAnySkills = (sk.technical && sk.technical.length) || (sk.softSkills && sk.softSkills.length) || (sk.tools && sk.tools.length);
+      if (hasAnySkills) {
+        html += '<div class="resume-preview-page__section"><h2 class="resume-preview-page__section-title">Skills</h2><div class="resume-preview-page__section-body">';
+        if (sk.technical && sk.technical.length) {
+          html += '<div class="resume-preview-page__skill-group"><span class="resume-preview-page__skill-group-label">Technical Skills</span><div class="resume-preview-page__pills">';
+          sk.technical.forEach(function (t) { html += '<span class="resume-preview-page__pill">' + escapeHtml(t) + '</span>'; });
+          html += '</div></div>';
+        }
+        if (sk.softSkills && sk.softSkills.length) {
+          html += '<div class="resume-preview-page__skill-group"><span class="resume-preview-page__skill-group-label">Soft Skills</span><div class="resume-preview-page__pills">';
+          sk.softSkills.forEach(function (t) { html += '<span class="resume-preview-page__pill">' + escapeHtml(t) + '</span>'; });
+          html += '</div></div>';
+        }
+        if (sk.tools && sk.tools.length) {
+          html += '<div class="resume-preview-page__skill-group"><span class="resume-preview-page__skill-group-label">Tools & Technologies</span><div class="resume-preview-page__pills">';
+          sk.tools.forEach(function (t) { html += '<span class="resume-preview-page__pill">' + escapeHtml(t) + '</span>'; });
+          html += '</div></div>';
+        }
         html += '</div></div>';
       }
-      if (sk.softSkills && sk.softSkills.length) {
-        html += '<div class="resume-preview-page__skill-group"><span class="resume-preview-page__skill-group-label">Soft Skills</span><div class="resume-preview-page__pills">';
-        sk.softSkills.forEach(function (t) { html += '<span class="resume-preview-page__pill">' + escapeHtml(t) + '</span>'; });
+      var links = d.links || {};
+      if ((links.github || '').trim() || (links.linkedin || '').trim()) {
+        html += '<div class="resume-preview-page__section"><h2 class="resume-preview-page__section-title">Links</h2><div class="resume-preview-page__section-body">';
+        if ((links.github || '').trim()) html += 'GitHub · ';
+        if ((links.linkedin || '').trim()) html += 'LinkedIn';
         html += '</div></div>';
       }
-      if (sk.tools && sk.tools.length) {
-        html += '<div class="resume-preview-page__skill-group"><span class="resume-preview-page__skill-group-label">Tools & Technologies</span><div class="resume-preview-page__pills">';
-        sk.tools.forEach(function (t) { html += '<span class="resume-preview-page__pill">' + escapeHtml(t) + '</span>'; });
-        html += '</div></div>';
-      }
-      html += '</div></div>';
     }
 
-    var links = d.links || {};
-    if ((links.github || '').trim() || (links.linkedin || '').trim()) {
-      html += '<div class="resume-preview-page__section"><h2 class="resume-preview-page__section-title">Links</h2><div class="resume-preview-page__section-body">';
-      if ((links.github || '').trim()) html += 'GitHub · ';
-      if ((links.linkedin || '').trim()) html += 'LinkedIn';
-      html += '</div></div>';
-    }
-
+    if (isModern) html += '</div>';
     html += '</div>';
     container.innerHTML = html;
   }
@@ -512,6 +627,10 @@
     setResumeData: setResumeData,
     getTemplate: getTemplate,
     setTemplate: setTemplate,
+    getThemeColor: getThemeColor,
+    setThemeColor: setThemeColor,
+    getThemeColorHsl: getThemeColorHsl,
+    THEME_COLORS: THEME_COLORS,
     getTopImprovements: getTopImprovements,
     getBulletGuidance: getBulletGuidance,
     computeATSScore: computeATSScore,
