@@ -276,6 +276,7 @@ textarea.kn-input {
 .resume-live-preview__sidebar .resume-live-preview__pill {
   color: #fff;
   border-color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.15);
 }
 
 .resume-live-preview__main {
@@ -555,6 +556,7 @@ textarea.kn-input {
 .resume-preview-page__sidebar .resume-preview-page__pill {
   color: #fff;
   border-color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.15);
 }
 
 .resume-preview-page__main {
