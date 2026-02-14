@@ -83,6 +83,11 @@
     </div>
 
     <aside class="resume-builder__preview">
+      <div class="template-tabs" role="tablist" aria-label="Resume template">
+        <button type="button" class="template-tabs__btn" role="tab" data-template="classic" aria-selected="true">Classic</button>
+        <button type="button" class="template-tabs__btn" role="tab" data-template="modern" aria-selected="false">Modern</button>
+        <button type="button" class="template-tabs__btn" role="tab" data-template="minimal" aria-selected="false">Minimal</button>
+      </div>
       <div class="ats-block" id="ats-block">
         <p class="ats-score__label">ATS Readiness Score</p>
         <div class="ats-score__meter-wrap">
@@ -91,7 +96,13 @@
         <p class="ats-score__value"><span id="ats-score-value">0</span>/100</p>
         <ul class="ats-suggestions" id="ats-suggestions" aria-label="Suggestions to improve ATS score"></ul>
       </div>
-      <div id="live-preview"></div>
+      <div class="improvement-panel" id="improvement-panel">
+        <p class="improvement-panel__title">Top 3 Improvements</p>
+        <ul class="improvement-panel__list" id="improvement-list"></ul>
+      </div>
+      <div id="live-preview-wrap" data-template="classic">
+        <div id="live-preview"></div>
+      </div>
     </aside>
   </div>
 
@@ -215,7 +226,7 @@
           li.className = 'resume-entry';
           li.innerHTML = '<div class="resume-entry__row"><input type="text" class="kn-input exp-title" placeholder="Job title"><input type="text" class="kn-input exp-company" placeholder="Company"></div>' +
             '<div class="resume-entry__row"><input type="text" class="kn-input exp-location" placeholder="Location"><input type="text" class="kn-input exp-period" placeholder="Period"></div>' +
-            '<div class="resume-entry__row resume-entry__row--full"><textarea class="kn-input exp-desc" placeholder="Description" rows="2"></textarea></div>' +
+            '<div class="resume-entry__row resume-entry__row--full"><textarea class="kn-input exp-desc" placeholder="Description (one bullet per line)" rows="2"></textarea><div class="bullet-guidance" aria-live="polite"></div></div>' +
             '<div class="resume-entry__actions"><button type="button" class="kn-btn kn-btn--secondary remove-exp">Remove</button></div>';
           li.querySelector('.exp-title').value = e.title || '';
           li.querySelector('.exp-company').value = e.company || '';
@@ -242,7 +253,7 @@
           var li = document.createElement('li');
           li.className = 'resume-entry';
           li.innerHTML = '<div class="resume-entry__row resume-entry__row--full"><input type="text" class="kn-input proj-name" placeholder="Project name"></div>' +
-            '<div class="resume-entry__row resume-entry__row--full"><textarea class="kn-input proj-desc" placeholder="Description" rows="2"></textarea></div>' +
+            '<div class="resume-entry__row resume-entry__row--full"><textarea class="kn-input proj-desc" placeholder="Description (one bullet per line)" rows="2"></textarea><div class="bullet-guidance" aria-live="polite"></div></div>' +
             '<div class="resume-entry__row resume-entry__row--full"><input type="url" class="kn-input proj-link" placeholder="Link (optional)"></div>' +
             '<div class="resume-entry__actions"><button type="button" class="kn-btn kn-btn--secondary remove-proj">Remove</button></div>';
           li.querySelector('.proj-name').value = e.name || '';
@@ -297,11 +308,55 @@
         }
       }
 
+      function updateImprovements(data) {
+        var list = RA.getTopImprovements(data);
+        var listEl = document.getElementById('improvement-list');
+        if (!listEl) return;
+        listEl.innerHTML = list.map(function (s) {
+          return '<li class="improvement-panel__item">' + RA.escapeHtml(s) + '</li>';
+        }).join('');
+      }
+
+      function updateBulletGuidance() {
+        document.querySelectorAll('.exp-desc').forEach(function (ta) {
+          var guidance = ta.nextElementSibling;
+          if (!guidance || !guidance.classList.contains('bullet-guidance')) return;
+          var g = RA.getBulletGuidance(ta.value);
+          var parts = [];
+          if (g.needActionVerb) parts.push('Start with a strong action verb.');
+          if (g.needNumber) parts.push('Add measurable impact (numbers).');
+          guidance.textContent = parts.length ? parts.join(' ') : '';
+          guidance.className = 'bullet-guidance' + (parts.length ? ' bullet-guidance--visible' : '');
+        });
+        document.querySelectorAll('.proj-desc').forEach(function (ta) {
+          var guidance = ta.nextElementSibling;
+          if (!guidance || !guidance.classList.contains('bullet-guidance')) return;
+          var g = RA.getBulletGuidance(ta.value);
+          var parts = [];
+          if (g.needActionVerb) parts.push('Start with a strong action verb.');
+          if (g.needNumber) parts.push('Add measurable impact (numbers).');
+          guidance.textContent = parts.length ? parts.join(' ') : '';
+          guidance.className = 'bullet-guidance' + (parts.length ? ' bullet-guidance--visible' : '');
+        });
+      }
+
+      function applyTemplate(key) {
+        var wrap = document.getElementById('live-preview-wrap');
+        if (wrap) wrap.setAttribute('data-template', key);
+        document.querySelectorAll('.template-tabs__btn').forEach(function (btn) {
+          var isSelected = btn.getAttribute('data-template') === key;
+          btn.classList.toggle('template-tabs__btn--active', isSelected);
+          btn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        });
+      }
+
       function sync() {
         var data = getDataFromForm();
         RA.setResumeData(data);
         RA.renderLivePreview(data, previewEl);
         updateATS(data);
+        updateImprovements(data);
+        updateBulletGuidance();
       }
 
       document.getElementById('add-education').onclick = addEducationRow;
@@ -319,12 +374,26 @@
         setFormFromData(sample);
         RA.renderLivePreview(sample, previewEl);
         updateATS(sample);
+        updateImprovements(sample);
+        updateBulletGuidance();
       };
+
+      document.querySelectorAll('.template-tabs__btn').forEach(function (btn) {
+        btn.onclick = function () {
+          var key = btn.getAttribute('data-template');
+          if (!key) return;
+          RA.setTemplate(key);
+          applyTemplate(key);
+        };
+      });
 
       var initialData = RA.getResumeData();
       setFormFromData(initialData);
       RA.renderLivePreview(initialData, previewEl);
+      applyTemplate(RA.getTemplate());
       updateATS(initialData);
+      updateImprovements(initialData);
+      updateBulletGuidance();
     })();
   </script>
 </body>

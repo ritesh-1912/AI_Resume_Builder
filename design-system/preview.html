@@ -20,6 +20,11 @@
   </nav>
 
   <main class="resume-preview-page">
+    <div class="template-tabs template-tabs--preview" role="tablist" aria-label="Resume template">
+      <button type="button" class="template-tabs__btn" role="tab" data-template="classic" aria-selected="true">Classic</button>
+      <button type="button" class="template-tabs__btn" role="tab" data-template="modern" aria-selected="false">Modern</button>
+      <button type="button" class="template-tabs__btn" role="tab" data-template="minimal" aria-selected="false">Minimal</button>
+    </div>
     <div id="preview-content"></div>
   </main>
 
@@ -27,8 +32,28 @@
   <script>
     (function () {
       var RA = window.ResumeApp;
-      if (RA && document.getElementById('preview-content')) {
-        RA.renderPreviewPage(document.getElementById('preview-content'));
+      var container = document.getElementById('preview-content');
+      if (RA && container) {
+        container.setAttribute('data-template', RA.getTemplate());
+        RA.renderPreviewPage(container);
+        document.querySelectorAll('.template-tabs__btn').forEach(function (btn) {
+          btn.onclick = function () {
+            var key = btn.getAttribute('data-template');
+            if (!key) return;
+            RA.setTemplate(key);
+            container.setAttribute('data-template', key);
+            document.querySelectorAll('.template-tabs__btn').forEach(function (b) {
+              var sel = b.getAttribute('data-template') === key;
+              b.classList.toggle('template-tabs__btn--active', sel);
+              b.setAttribute('aria-selected', sel ? 'true' : 'false');
+            });
+          };
+        });
+        var current = RA.getTemplate();
+        document.querySelectorAll('.template-tabs__btn').forEach(function (b) {
+          b.classList.toggle('template-tabs__btn--active', b.getAttribute('data-template') === current);
+          b.setAttribute('aria-selected', b.getAttribute('data-template') === current ? 'true' : 'false');
+        });
       }
     })();
   </script>

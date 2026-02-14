@@ -58,3 +58,36 @@ Suggestions are derived from missing rules; max 3 shown.
 - **Routes:** `/`, `/builder`, `/preview`, `/proof` (and `/rb/*` for Build Track) unchanged.
 - **Design:** KodNest Premium (tokens, serif/sans, accent, spacing) unchanged; ATS block is calm, minimal (meter + label + value + list).
 - **Storage:** Resume data is stored only in `localStorage` under `resumeBuilderData`; no server or other keys used for this feature.
+
+---
+
+## 6. Template tabs (Classic, Modern, Minimal)
+
+- Open **Builder** or **Preview**. **Expected:** Three tabs above the content: Classic | Modern | Minimal. Classic is selected by default (or the last saved choice).
+- Click **Modern**. **Expected:** Resume layout updates (e.g. section titles uppercase, tighter name size). Content and data unchanged. ATS score unchanged.
+- Click **Minimal**. **Expected:** More compact layout (smaller type, tighter spacing). Still B&W, no flashy elements.
+- Click **Classic**. **Expected:** Default layout restored.
+- Refresh the page. **Expected:** The last selected template remains (stored in `localStorage` key `resumeBuilderTemplate`).
+- On **Preview** page, switch template. **Expected:** Same three options; layout switches; content identical. Persist and refresh: template choice is remembered.
+
+---
+
+## 7. Bullet structure guidance (Experience & Projects)
+
+- In **Builder**, add one **Experience** entry. In the description textarea, enter one line: `Helped the team with tasks.` (no action verb at start, no number).
+- **Expected:** Below the textarea, a subtle inline message appears: “Start with a strong action verb. Add measurable impact (numbers).”
+- Change the line to: `Built the dashboard.` **Expected:** “Add measurable impact (numbers).” still shown (no digit/%/k/M/x).
+- Add a number: `Built the dashboard and cut load time by 40%.` **Expected:** Guidance disappears or only “Start with a strong action verb” if you remove the verb.
+- Add a **Project** with description: `Fixed bugs.` **Expected:** Same guidance (action verb + numbers). Change to `Developed API used by 3 teams.` **Expected:** Guidance clears.
+- **Expected:** Input is never blocked; guidance is advisory only.
+
+**Action verbs checked:** Built, Developed, Designed, Implemented, Led, Improved, Created, Optimized, Automated (case-insensitive).
+
+---
+
+## 8. Top 3 Improvements panel
+
+- In **Builder**, below the ATS Score block, **Expected:** A section titled “Top 3 Improvements” with a list (0–3 items).
+- With empty or partial resume, **Expected:** Up to 3 items such as: “Add at least 2 projects.”, “Add measurable impact (numbers) in bullets.”, “Expand summary (target 40+ words).”, “Add more skills (target 8+).”, “Add experience (internship or project work).”
+- Add content (e.g. 2 projects, numbers in bullets, 40+ word summary, 8+ skills, 1 experience). **Expected:** Corresponding improvement items disappear; list shrinks or empties.
+- **Expected:** ATS score logic is unchanged; template switching does not change the score.

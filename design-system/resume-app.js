@@ -6,6 +6,63 @@
   'use strict';
 
   var STORAGE_KEY = 'resumeBuilderData';
+  var TEMPLATE_KEY = 'resumeBuilderTemplate';
+  var ACTION_VERBS = /^(Built|Developed|Designed|Implemented|Led|Improved|Created|Optimized|Automated)\b/i;
+  var NUMBER_RE = /\d|%|\b[kKmMxX]\b/;
+
+  function getTemplate() {
+    try {
+      var t = localStorage.getItem(TEMPLATE_KEY);
+      if (t === 'modern' || t === 'minimal') return t;
+    } catch (e) {}
+    return 'classic';
+  }
+
+  function setTemplate(key) {
+    if (key !== 'classic' && key !== 'modern' && key !== 'minimal') return;
+    try { localStorage.setItem(TEMPLATE_KEY, key); } catch (e) {}
+  }
+
+  /**
+   * Top 3 Improvements (separate from ATS suggestions). Max 3, priority order.
+   */
+  function getTopImprovements(data) {
+    var d = data || getEmptyResume();
+    var out = [];
+    var projectCount = (d.projects && d.projects.length) || 0;
+    if (projectCount < 2) out.push('Add at least 2 projects.');
+    var hasNumber = false;
+    function checkDesc(text) {
+      if ((text || '').trim() && NUMBER_RE.test(text)) hasNumber = true;
+    }
+    (d.experience || []).forEach(function (e) { checkDesc(e.description); });
+    (d.projects || []).forEach(function (e) { checkDesc(e.description); });
+    if (!hasNumber) out.push('Add measurable impact (numbers) in bullets.');
+    var summaryWords = (d.summary || '').trim().split(/\s+/).filter(Boolean).length;
+    if (summaryWords < 40) out.push('Expand summary (target 40+ words).');
+    var skillsCount = (d.skills || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean).length;
+    if (skillsCount < 8) out.push('Add more skills (target 8+).');
+    var expCount = (d.experience && d.experience.length) || 0;
+    if (expCount < 1) out.push('Add experience (internship or project work).');
+    return out.slice(0, 3);
+  }
+
+  /**
+   * Bullet discipline: action verb + numeric impact. Returns { needActionVerb, needNumber }.
+   */
+  function getBulletGuidance(descriptionText) {
+    var text = (descriptionText || '').trim();
+    if (!text) return { needActionVerb: false, needNumber: false };
+    var lines = text.split(/\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+    if (lines.length === 0) return { needActionVerb: false, needNumber: false };
+    var needActionVerb = false;
+    var hasNumber = false;
+    for (var i = 0; i < lines.length; i++) {
+      if (!ACTION_VERBS.test(lines[i])) needActionVerb = true;
+      if (NUMBER_RE.test(lines[i])) hasNumber = true;
+    }
+    return { needActionVerb: needActionVerb, needNumber: !hasNumber };
+  }
 
   function getEmptyResume() {
     return {
@@ -282,6 +339,10 @@
     getSampleResume: getSampleResume,
     getResumeData: getResumeData,
     setResumeData: setResumeData,
+    getTemplate: getTemplate,
+    setTemplate: setTemplate,
+    getTopImprovements: getTopImprovements,
+    getBulletGuidance: getBulletGuidance,
     computeATSScore: computeATSScore,
     renderLivePreview: renderLivePreview,
     renderPreviewPage: renderPreviewPage,
