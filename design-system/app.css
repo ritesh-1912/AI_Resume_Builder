@@ -293,6 +293,26 @@
   color: var(--kn-text);
 }
 
+.rb-proof-section__hint {
+  font-size: 0.875rem;
+  color: var(--kn-text);
+  opacity: 0.8;
+  margin: -0.5rem 0 var(--kn-space-2);
+}
+
+.rb-proof__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--kn-space-2);
+  margin-bottom: var(--kn-space-4);
+}
+
+.rb-proof__badge-wrap {
+  margin: 0;
+}
+
 .rb-proof-steps {
   list-style: none;
   padding: 0;
