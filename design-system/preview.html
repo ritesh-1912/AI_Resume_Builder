@@ -44,12 +44,41 @@
       <button type="button" class="color-theme-picker__swatch" data-color="forest" title="Forest" style="background: hsl(150, 50%, 30%);"><span class="color-theme-picker__check" aria-hidden="true">✓</span></button>
       <button type="button" class="color-theme-picker__swatch" data-color="charcoal" title="Charcoal" style="background: hsl(0, 0%, 25%);"><span class="color-theme-picker__check" aria-hidden="true">✓</span></button>
     </div>
+    <div class="ats-preview no-print" id="ats-preview" aria-label="ATS Resume Score">
+      <div class="ats-circle-wrap">
+        <div class="ats-circle" id="ats-circle">
+          <svg class="ats-circle__svg" viewBox="0 0 36 36" aria-hidden="true">
+            <path class="ats-circle__bg" d="M18 2.5 a 15.5 15.5 0 0 1 0 31 a 15.5 15.5 0 0 1 0 -31" />
+            <path class="ats-circle__fill" id="ats-circle-fill" d="M18 2.5 a 15.5 15.5 0 0 1 0 31 a 15.5 15.5 0 0 1 0 -31" />
+          </svg>
+          <span class="ats-circle__value" id="ats-circle-value">0</span>
+        </div>
+      </div>
+      <p class="ats-preview__band" id="ats-band-label">Needs Work</p>
+      <p class="ats-preview__hint">Based on resume completeness</p>
+      <ul class="ats-preview__suggestions" id="ats-preview-suggestions" aria-label="Suggestions to improve ATS score"></ul>
+    </div>
     <div class="preview-export-actions no-print">
       <button type="button" class="kn-btn kn-btn--primary" id="btn-print-pdf">Download PDF</button>
       <button type="button" class="kn-btn kn-btn--secondary" id="btn-copy-text">Copy Resume as Text</button>
       <p class="preview-export-warning" id="export-warning" aria-live="polite" hidden></p>
     </div>
     <div id="preview-content" class="preview-print-area"></div>
+    <details class="test-checklist no-print" id="test-checklist">
+      <summary class="test-checklist__summary">Test checklist (10 items)</summary>
+      <ul class="test-checklist__list" aria-label="Feature test checklist">
+        <li><label><input type="checkbox" class="test-checklist__cb"> All form sections save to localStorage</label></li>
+        <li><label><input type="checkbox" class="test-checklist__cb"> Live preview updates in real-time</label></li>
+        <li><label><input type="checkbox" class="test-checklist__cb"> Template switching preserves data</label></li>
+        <li><label><input type="checkbox" class="test-checklist__cb"> Color theme persists after refresh</label></li>
+        <li><label><input type="checkbox" class="test-checklist__cb"> ATS score calculates correctly</label></li>
+        <li><label><input type="checkbox" class="test-checklist__cb"> Score updates live on edit</label></li>
+        <li><label><input type="checkbox" class="test-checklist__cb"> Export buttons work (copy/download)</label></li>
+        <li><label><input type="checkbox" class="test-checklist__cb"> Empty states handled gracefully</label></li>
+        <li><label><input type="checkbox" class="test-checklist__cb"> Mobile responsive layout works</label></li>
+        <li><label><input type="checkbox" class="test-checklist__cb"> No console errors on any page</label></li>
+      </ul>
+    </details>
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   </main>
 
@@ -85,8 +114,39 @@
         setTimeout(function () { el.hidden = true; }, 3000);
       }
 
+      function updateATSPreview() {
+        var data = RA.getResumeData();
+        var result = RA.computeATSScore(data);
+        var score = result.score;
+        var band = RA.getATSBand(score);
+        var fillEl = document.getElementById('ats-circle-fill');
+        var valueEl = document.getElementById('ats-circle-value');
+        var bandEl = document.getElementById('ats-band-label');
+        var listEl = document.getElementById('ats-preview-suggestions');
+        var wrapEl = document.getElementById('ats-preview');
+        if (valueEl) valueEl.textContent = score;
+        if (bandEl) {
+          bandEl.textContent = band.label;
+          bandEl.className = 'ats-preview__band ats-preview__band--' + band.level;
+        }
+        if (wrapEl) {
+          wrapEl.className = 'ats-preview no-print ats-preview--' + band.level;
+        }
+        if (fillEl) {
+          var circumference = 2 * Math.PI * 15.5;
+          var dash = (score / 100) * circumference;
+          fillEl.style.strokeDasharray = dash + ' ' + circumference;
+        }
+        if (listEl) {
+          listEl.innerHTML = (result.suggestions || []).map(function (s) {
+            return '<li class="ats-preview__suggestion">' + RA.escapeHtml(s) + '</li>';
+          }).join('');
+        }
+      }
+
       applyTemplate(RA.getTemplate());
       applyTheme(RA.getThemeColor());
+      updateATSPreview();
 
       document.querySelectorAll('.template-picker__thumb').forEach(function (btn) {
         btn.onclick = function () {

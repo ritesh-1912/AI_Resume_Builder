@@ -176,60 +176,73 @@
   }
 
   /**
-   * ATS Score v1: deterministic 0–100.
-   * +15 summary 40–120 words, +10 ≥2 projects, +10 ≥1 experience,
-   * +10 ≥8 skills, +10 GitHub or LinkedIn, +15 number in bullets, +10 education complete.
-   * Returns { score, suggestions } (suggestions max 3).
+   * ATS Score: deterministic 0–100.
+   * +10 name, +10 email, +10 summary > 50 chars, +15 ≥1 experience with bullets,
+   * +10 ≥1 education, +10 ≥5 skills, +10 ≥1 project, +5 phone, +5 LinkedIn, +5 GitHub,
+   * +10 summary contains action verbs.
+   * Returns { score, suggestions } where suggestions list missing items with point values.
    */
   function computeATSScore(data) {
     var d = data || getEmptyResume();
     var score = 0;
     var suggestions = [];
+    var p = d.personal || {};
+    var links = d.links || {};
 
-    var summaryWords = (d.summary || '').trim().split(/\s+/).filter(Boolean).length;
-    if (summaryWords >= 40 && summaryWords <= 120) score += 15;
-    else suggestions.push('Write a stronger summary (40–120 words).');
+    if ((p.name || '').trim()) score += 10;
+    else suggestions.push('Add your name (+10 points)');
 
-    var projectCount = (d.projects && d.projects.length) || 0;
-    if (projectCount >= 2) score += 10;
-    else suggestions.push('Add at least 2 projects.');
+    if ((p.email || '').trim()) score += 10;
+    else suggestions.push('Add your email (+10 points)');
 
-    var expCount = (d.experience && d.experience.length) || 0;
-    if (expCount >= 1) score += 10;
-    else suggestions.push('Add at least one experience entry.');
+    var summaryText = (d.summary || '').trim();
+    if (summaryText.length > 50) score += 10;
+    else suggestions.push('Add a professional summary over 50 characters (+10 points)');
+
+    var hasExpWithBullets = (d.experience || []).some(function (e) {
+      return ((e.description || '').trim().length > 0);
+    });
+    if (hasExpWithBullets) score += 15;
+    else suggestions.push('Add at least 1 experience entry with bullets (+15 points)');
+
+    var hasEducation = (d.education || []).length >= 1;
+    if (hasEducation) score += 10;
+    else suggestions.push('Add at least 1 education entry (+10 points)');
 
     var skillsCount = 0;
     if (d.skills && typeof d.skills === 'object') {
       skillsCount = (d.skills.technical || []).length + (d.skills.softSkills || []).length + (d.skills.tools || []).length;
     }
-    if (skillsCount >= 8) score += 10;
-    else suggestions.push('Add more skills (target 8+).');
+    if (skillsCount >= 5) score += 10;
+    else suggestions.push('Add at least 5 skills (+10 points)');
 
-    var hasLink = !!((d.links && (d.links.github || '').trim()) || (d.links && (d.links.linkedin || '').trim()));
-    if (hasLink) score += 10;
-    else suggestions.push('Add a GitHub or LinkedIn link.');
+    var projectCount = (d.projects && d.projects.length) || 0;
+    if (projectCount >= 1) score += 10;
+    else suggestions.push('Add at least 1 project (+10 points)');
 
-    var hasNumberInBullets = false;
-    var numberRe = /\d|%|\b[kKmMxX]\b/;
-    function checkDesc(text) {
-      if ((text || '').trim() && numberRe.test(text)) hasNumberInBullets = true;
-    }
-    (d.experience || []).forEach(function (e) { checkDesc(e.description); });
-    (d.projects || []).forEach(function (e) { checkDesc(e.description); });
-    if (hasNumberInBullets) score += 15;
-    else suggestions.push('Add measurable impact (numbers) in bullets.');
+    if ((p.phone || '').trim()) score += 5;
+    else suggestions.push('Add your phone (+5 points)');
 
-    var educationComplete = false;
-    if (d.education && d.education.length) {
-      educationComplete = d.education.some(function (e) {
-        return (e.degree || '').trim() && (e.school || '').trim() && (e.year || '').trim();
-      });
-    }
-    if (educationComplete) score += 10;
-    else suggestions.push('Complete education (degree, school, year).');
+    if ((links.linkedin || '').trim()) score += 5;
+    else suggestions.push('Add LinkedIn link (+5 points)');
+
+    if ((links.github || '').trim()) score += 5;
+    else suggestions.push('Add GitHub link (+5 points)');
+
+    if (ACTION_VERBS.test(summaryText)) score += 10;
+    else suggestions.push('Use action verbs in summary (e.g. built, led, designed) (+10 points)');
 
     score = Math.min(100, score);
-    return { score: score, suggestions: suggestions.slice(0, 3) };
+    return { score: score, suggestions: suggestions };
+  }
+
+  /**
+   * ATS band label for score: 0–40 Needs Work, 41–70 Getting There, 71–100 Strong Resume.
+   */
+  function getATSBand(score) {
+    if (score <= 40) return { label: 'Needs Work', level: 'low' };
+    if (score <= 70) return { label: 'Getting There', level: 'medium' };
+    return { label: 'Strong Resume', level: 'high' };
   }
 
   function escapeHtml(str) {
@@ -634,6 +647,7 @@
     getTopImprovements: getTopImprovements,
     getBulletGuidance: getBulletGuidance,
     computeATSScore: computeATSScore,
+    getATSBand: getATSBand,
     getResumeAsPlainText: getResumeAsPlainText,
     getExportValidationWarning: getExportValidationWarning,
     getSuggestedSkills: getSuggestedSkills,

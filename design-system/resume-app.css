@@ -1107,6 +1107,170 @@ textarea.kn-input {
   position: relative;
 }
 
+/* ─── ATS on Preview page: circular progress ─── */
+.ats-preview {
+  margin-bottom: var(--kn-space-4);
+  padding: var(--kn-space-3);
+  border: var(--kn-border-width) solid var(--kn-border);
+  border-radius: var(--kn-radius);
+  background: var(--kn-background);
+  text-align: center;
+}
+
+.ats-circle-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--kn-space-2);
+}
+
+.ats-circle {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.ats-circle__svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.ats-circle__bg {
+  fill: none;
+  stroke: var(--kn-border);
+  stroke-width: 3;
+}
+
+.ats-circle__fill {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.3s ease;
+}
+
+.ats-preview--low .ats-circle__fill {
+  stroke: #dc2626;
+}
+
+.ats-preview--medium .ats-circle__fill {
+  stroke: #d97706;
+}
+
+.ats-preview--high .ats-circle__fill {
+  stroke: #16a34a;
+}
+
+.ats-circle__value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--kn-text);
+}
+
+.ats-preview__band {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 var(--kn-space-1);
+}
+
+.ats-preview__band--low {
+  color: #dc2626;
+}
+
+.ats-preview__band--medium {
+  color: #d97706;
+}
+
+.ats-preview__band--high {
+  color: #16a34a;
+}
+
+.ats-preview__hint {
+  font-size: 0.75rem;
+  color: var(--kn-text);
+  opacity: 0.7;
+  margin: 0 0 var(--kn-space-2);
+}
+
+.ats-preview__suggestions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  font-size: 0.8125rem;
+  color: var(--kn-text);
+  line-height: 1.5;
+}
+
+.ats-preview__suggestion {
+  padding: var(--kn-space-1) 0;
+  padding-left: 1em;
+  position: relative;
+}
+
+.ats-preview__suggestion::before {
+  content: "• ";
+  position: absolute;
+  left: 0;
+}
+
+/* Builder ATS band colors for meter */
+.ats-block.ats-block--low #ats-meter,
+#live-preview-wrap .ats-block.ats-block--low .ats-score__meter {
+  background: #dc2626;
+}
+
+.ats-block.ats-block--medium #ats-meter,
+#live-preview-wrap .ats-block.ats-block--medium .ats-score__meter {
+  background: #d97706;
+}
+
+.ats-block.ats-block--high #ats-meter,
+#live-preview-wrap .ats-block.ats-block--high .ats-score__meter {
+  background: #16a34a;
+}
+
+/* ─── Test checklist ─── */
+.test-checklist {
+  margin-top: var(--kn-space-4);
+  padding: var(--kn-space-3);
+  border: var(--kn-border-width) solid var(--kn-border);
+  border-radius: var(--kn-radius);
+  background: var(--kn-background);
+}
+
+.test-checklist__summary {
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--kn-text);
+}
+
+.test-checklist__list {
+  list-style: none;
+  padding: 0;
+  margin: var(--kn-space-2) 0 0;
+  font-size: 0.875rem;
+  color: var(--kn-text);
+  line-height: 2;
+}
+
+.test-checklist__list label {
+  cursor: pointer;
+}
+
+.test-checklist__cb {
+  margin-right: var(--kn-space-1);
+}
+
+.ats-suggestions__item {
+  padding: var(--kn-space-1) 0;
+  padding-left: 1em;
+  position: relative;
+}
+
 .ats-suggestions__item::before {
   content: "·";
   position: absolute;

@@ -473,14 +473,20 @@
       function updateATS(data) {
         var result = RA.computeATSScore(data);
         var score = result.score;
+        var band = RA.getATSBand(score);
         var suggestions = result.suggestions || [];
         var valueEl = document.getElementById('ats-score-value');
         var meterEl = document.getElementById('ats-meter');
         var listEl = document.getElementById('ats-suggestions');
+        var blockEl = document.getElementById('ats-block');
         if (valueEl) valueEl.textContent = score;
         if (meterEl) {
           meterEl.style.width = score + '%';
           meterEl.setAttribute('aria-valuenow', score);
+        }
+        if (blockEl) {
+          blockEl.classList.remove('ats-block--low', 'ats-block--medium', 'ats-block--high');
+          blockEl.classList.add('ats-block--' + band.level);
         }
         if (listEl) {
           listEl.innerHTML = suggestions.map(function (s) {
