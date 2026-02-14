@@ -1,0 +1,24 @@
+{
+  "buildCommand": null,
+  "outputDirectory": "design-system",
+  "rewrites": [
+    { "source": "/rb/01-problem", "destination": "/design-system/rb/01-problem.html" },
+    { "source": "/rb/02-market", "destination": "/design-system/rb/02-market.html" },
+    { "source": "/rb/03-architecture", "destination": "/design-system/rb/03-architecture.html" },
+    { "source": "/rb/04-hld", "destination": "/design-system/rb/04-hld.html" },
+    { "source": "/rb/05-lld", "destination": "/design-system/rb/05-lld.html" },
+    { "source": "/rb/06-build", "destination": "/design-system/rb/06-build.html" },
+    { "source": "/rb/07-test", "destination": "/design-system/rb/07-test.html" },
+    { "source": "/rb/08-ship", "destination": "/design-system/rb/08-ship.html" },
+    { "source": "/rb/proof", "destination": "/design-system/rb/proof.html" },
+    { "source": "/(.*)", "destination": "/design-system/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    }
+  ]
+}

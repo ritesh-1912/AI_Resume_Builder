@@ -1,0 +1,475 @@
+/**
+ * AI Resume Builder — App styles (KodNest Premium Build System)
+ * Project 3 step-page layout, build panel, proof page, gating states.
+ */
+
+/* ─── App shell ─── */
+.rb-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Step navigation (bottom of workspace) ─── */
+.rb-step-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--kn-space-4);
+  padding-top: var(--kn-space-3);
+  border-top: var(--kn-border-width) solid var(--kn-border);
+}
+
+.rb-step-nav__info {
+  font-size: 0.875rem;
+  color: var(--kn-text);
+  opacity: 0.6;
+}
+
+/* ─── Build Panel (30% right) ─── */
+.rb-panel-section {
+  margin-bottom: var(--kn-space-3);
+}
+
+.rb-panel-section__title {
+  font-family: var(--kn-font-sans);
+  font-size: var(--kn-body-size);
+  font-weight: 600;
+  color: var(--kn-text);
+  margin: 0 0 var(--kn-space-1);
+}
+
+.rb-panel-section__hint {
+  font-size: 0.8125rem;
+  color: var(--kn-text);
+  opacity: 0.6;
+  margin: 0 0 var(--kn-space-2);
+}
+
+.rb-prompt-textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: var(--kn-space-2);
+  font-family: var(--kn-font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--kn-text);
+  background: #fff;
+  border: var(--kn-border-width) solid var(--kn-border);
+  border-radius: var(--kn-radius);
+  resize: vertical;
+  transition: border-color var(--kn-transition);
+}
+
+.rb-prompt-textarea:focus {
+  outline: none;
+  border-color: var(--kn-border-focus);
+}
+
+.rb-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kn-space-1);
+  margin-top: var(--kn-space-2);
+}
+
+.rb-panel-actions .kn-btn {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+/* ─── Feedback buttons ─── */
+.rb-feedback {
+  margin-top: var(--kn-space-3);
+  padding-top: var(--kn-space-2);
+  border-top: var(--kn-border-width) solid var(--kn-border);
+}
+
+.rb-feedback__title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--kn-text);
+  margin: 0 0 var(--kn-space-2);
+}
+
+.rb-feedback__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kn-space-1);
+}
+
+.rb-feedback__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--kn-space-1);
+  padding: var(--kn-space-1) var(--kn-space-2);
+  font-family: var(--kn-font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: var(--kn-border-width) solid var(--kn-border);
+  border-radius: var(--kn-radius);
+  background: var(--kn-background);
+  color: var(--kn-text);
+  cursor: pointer;
+  transition: border-color var(--kn-transition), background var(--kn-transition);
+}
+
+.rb-feedback__btn:hover {
+  border-color: var(--kn-text);
+}
+
+.rb-feedback__btn--success {
+  border-color: var(--kn-success);
+  color: var(--kn-success);
+}
+
+.rb-feedback__btn--success:hover {
+  background: var(--kn-success);
+  color: var(--kn-background);
+}
+
+.rb-feedback__btn--error {
+  border-color: var(--kn-accent);
+  color: var(--kn-accent);
+}
+
+.rb-feedback__btn--error:hover {
+  background: var(--kn-accent);
+  color: var(--kn-background);
+}
+
+.rb-feedback__btn--active {
+  font-weight: 600;
+}
+
+.rb-feedback__btn--active.rb-feedback__btn--success {
+  background: var(--kn-success);
+  color: var(--kn-background);
+}
+
+.rb-feedback__btn--active.rb-feedback__btn--error {
+  background: var(--kn-accent);
+  color: var(--kn-background);
+}
+
+/* ─── Screenshot upload ─── */
+.rb-screenshot {
+  margin-top: var(--kn-space-2);
+}
+
+.rb-screenshot__input {
+  display: none;
+}
+
+.rb-screenshot__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kn-space-1);
+  padding: var(--kn-space-1) var(--kn-space-2);
+  font-family: var(--kn-font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: var(--kn-border-width) dashed var(--kn-border);
+  border-radius: var(--kn-radius);
+  background: var(--kn-background);
+  color: var(--kn-text);
+  cursor: pointer;
+  transition: border-color var(--kn-transition);
+  width: 100%;
+  justify-content: center;
+}
+
+.rb-screenshot__label:hover {
+  border-color: var(--kn-text);
+}
+
+.rb-screenshot__name {
+  font-size: 0.8125rem;
+  color: var(--kn-text);
+  opacity: 0.7;
+  margin-top: var(--kn-space-1);
+  word-break: break-all;
+}
+
+/* ─── Artifact status indicator ─── */
+.rb-artifact-status {
+  margin-top: var(--kn-space-2);
+  padding: var(--kn-space-1) var(--kn-space-2);
+  border-radius: var(--kn-radius);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.rb-artifact-status--done {
+  background: rgba(90, 107, 82, 0.1);
+  color: var(--kn-success);
+  border: var(--kn-border-width) solid var(--kn-success);
+}
+
+.rb-artifact-status--pending {
+  background: rgba(154, 123, 46, 0.1);
+  color: var(--kn-warning);
+  border: var(--kn-border-width) solid var(--kn-warning);
+}
+
+/* ─── Gating lock overlay ─── */
+.rb-gated {
+  position: relative;
+}
+
+.rb-gated__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(247, 246, 243, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: var(--kn-radius);
+}
+
+.rb-gated__icon {
+  font-size: 2rem;
+  margin-bottom: var(--kn-space-2);
+  opacity: 0.6;
+}
+
+.rb-gated__text {
+  font-size: var(--kn-body-size);
+  font-weight: 500;
+  color: var(--kn-text);
+  margin-bottom: var(--kn-space-1);
+}
+
+.rb-gated__hint {
+  font-size: 0.875rem;
+  color: var(--kn-text);
+  opacity: 0.6;
+}
+
+/* ─── Workspace placeholder ─── */
+.rb-workspace-content {
+  max-width: var(--kn-body-max-width);
+}
+
+.rb-workspace-content p {
+  font-size: var(--kn-body-size);
+  line-height: var(--kn-body-line);
+  color: var(--kn-text);
+  opacity: 0.85;
+  margin: 0 0 var(--kn-space-2);
+}
+
+/* ─── Proof page ─── */
+.rb-proof {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--kn-space-5) var(--kn-space-4);
+}
+
+.rb-proof__title {
+  font-family: var(--kn-font-serif);
+  font-size: var(--kn-heading-size);
+  font-weight: 600;
+  letter-spacing: var(--kn-letter-spacing-heading);
+  margin: 0 0 var(--kn-space-4);
+  color: var(--kn-text);
+}
+
+.rb-proof-section {
+  margin-bottom: var(--kn-space-4);
+}
+
+.rb-proof-section__title {
+  font-family: var(--kn-font-serif);
+  font-size: var(--kn-heading-size-sm);
+  font-weight: 600;
+  margin: 0 0 var(--kn-space-2);
+  color: var(--kn-text);
+}
+
+.rb-proof-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: var(--kn-border-width) solid var(--kn-border);
+  border-radius: var(--kn-radius);
+}
+
+.rb-proof-step {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--kn-space-2) var(--kn-space-3);
+  border-bottom: var(--kn-border-width) solid var(--kn-border);
+  font-size: var(--kn-body-size);
+}
+
+.rb-proof-step:last-child {
+  border-bottom: none;
+}
+
+.rb-proof-step__name {
+  color: var(--kn-text);
+}
+
+.rb-proof-step__status {
+  font-weight: 500;
+  color: var(--kn-text);
+  opacity: 0.75;
+}
+
+.rb-proof-step__status--done {
+  color: var(--kn-success);
+  opacity: 1;
+}
+
+.rb-proof-artifacts {
+  margin-top: var(--kn-space-2);
+}
+
+.rb-proof-artifacts .form-group {
+  margin-bottom: var(--kn-space-3);
+}
+
+.rb-proof-artifacts .form-label {
+  display: block;
+  font-size: var(--kn-body-size);
+  font-weight: 500;
+  color: var(--kn-text);
+  margin-bottom: var(--kn-space-1);
+}
+
+.rb-proof-artifacts .form-hint {
+  font-size: 0.875rem;
+  color: var(--kn-accent);
+  margin-top: var(--kn-space-1);
+}
+
+.rb-proof-actions {
+  margin-top: var(--kn-space-4);
+  display: flex;
+  gap: var(--kn-space-2);
+  flex-wrap: wrap;
+}
+
+/* ─── Landing page ─── */
+.rb-landing {
+  max-width: var(--kn-body-max-width);
+  margin: 0 auto;
+  padding: var(--kn-space-5) var(--kn-space-4);
+}
+
+.rb-landing__headline {
+  font-family: var(--kn-font-serif);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: var(--kn-letter-spacing-heading);
+  line-height: 1.25;
+  margin: 0 0 var(--kn-space-3);
+  color: var(--kn-text);
+}
+
+.rb-landing__subtext {
+  font-size: var(--kn-body-size-lg);
+  line-height: var(--kn-body-line);
+  color: var(--kn-text);
+  opacity: 0.9;
+  margin: 0 0 var(--kn-space-4);
+}
+
+.rb-landing__steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--kn-space-4);
+  border: var(--kn-border-width) solid var(--kn-border);
+  border-radius: var(--kn-radius);
+}
+
+.rb-landing__step {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--kn-space-2) var(--kn-space-3);
+  border-bottom: var(--kn-border-width) solid var(--kn-border);
+  font-size: var(--kn-body-size);
+  color: var(--kn-text);
+}
+
+.rb-landing__step:last-child {
+  border-bottom: none;
+}
+
+.rb-landing__step a {
+  color: var(--kn-accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.rb-landing__step a:hover {
+  text-decoration: underline;
+}
+
+.rb-landing__step-locked {
+  opacity: 0.5;
+  font-size: 0.875rem;
+}
+
+/* ─── Proof footer (persistent, compact) ─── */
+.rb-proof-footer-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kn-space-2);
+  align-items: center;
+}
+
+.rb-proof-footer-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8125rem;
+  color: var(--kn-text);
+  opacity: 0.7;
+}
+
+.rb-proof-footer-item--done {
+  opacity: 1;
+  color: var(--kn-success);
+  font-weight: 500;
+}
+
+/* ─── Mobile responsive ─── */
+@media (max-width: 768px) {
+  .kn-main {
+    flex-direction: column;
+  }
+
+  .kn-workspace {
+    flex: 1 1 auto;
+    border-right: none;
+    border-bottom: var(--kn-border-width) solid var(--kn-border);
+  }
+
+  .kn-panel {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .kn-top-bar {
+    padding: var(--kn-space-1) var(--kn-space-2);
+    font-size: 0.875rem;
+  }
+
+  .kn-top-bar__progress {
+    display: none;
+  }
+
+  .rb-proof {
+    padding: var(--kn-space-4) var(--kn-space-2);
+  }
+}

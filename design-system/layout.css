@@ -1,0 +1,97 @@
+/**
+ * KodNest Premium Build System — Global Layout
+ * [Top Bar] → [Context Header] → [Workspace + Panel] → [Proof Footer]
+ */
+/* Requires tokens.css (or design-system.css) loaded first. */
+
+/* ─── Top Bar ─── */
+.kn-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--kn-space-2) var(--kn-space-4);
+  border-bottom: var(--kn-border-width) solid var(--kn-border);
+  background: var(--kn-background);
+}
+
+.kn-top-bar__project {
+  font-family: var(--kn-font-sans);
+  font-size: var(--kn-body-size);
+  font-weight: 500;
+  color: var(--kn-text);
+}
+
+.kn-top-bar__progress {
+  font-size: var(--kn-body-size);
+  color: var(--kn-text);
+  opacity: 0.8;
+}
+
+.kn-top-bar__status {
+  /* Badge styled in components */
+}
+
+/* ─── Context Header ─── */
+.kn-context-header {
+  padding: var(--kn-space-4) var(--kn-space-4) var(--kn-space-3);
+  border-bottom: var(--kn-border-width) solid var(--kn-border);
+}
+
+.kn-context-header .kn-heading,
+.kn-context-header .kn-heading-sm {
+  margin-bottom: var(--kn-space-1);
+}
+
+.kn-context-header .kn-subtext {
+  margin-bottom: 0;
+}
+
+/* ─── Main content: Workspace + Panel ─── */
+.kn-main {
+  display: flex;
+  min-height: calc(100vh - 200px);
+}
+
+.kn-workspace {
+  flex: 0 1 70%;
+  padding: var(--kn-space-4);
+  border-right: var(--kn-border-width) solid var(--kn-border);
+}
+
+.kn-panel {
+  flex: 0 0 30%;
+  min-width: 280px;
+  padding: var(--kn-space-4);
+  background: var(--kn-background);
+}
+
+/* ─── Proof Footer (persistent) ─── */
+.kn-proof-footer {
+  padding: var(--kn-space-3) var(--kn-space-4);
+  border-top: var(--kn-border-width) solid var(--kn-border);
+  background: var(--kn-background);
+}
+
+.kn-proof-footer__title {
+  font-size: var(--kn-body-size);
+  font-weight: 500;
+  margin: 0 0 var(--kn-space-2);
+  color: var(--kn-text);
+}
+
+.kn-proof-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kn-space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.kn-proof-checklist li {
+  display: flex;
+  align-items: center;
+  gap: var(--kn-space-1);
+  font-size: var(--kn-body-size);
+  color: var(--kn-text);
+}

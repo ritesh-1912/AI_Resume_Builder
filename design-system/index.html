@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Resume Builder — Build Track</title>
+  <link rel="stylesheet" href="design-system.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+  <div class="rb-landing">
+    <h1 class="rb-landing__headline">AI Resume Builder</h1>
+    <p class="rb-landing__subtext">
+      Project 3 — Build Track. Follow the 8-step guided build process.
+      Complete each step in order, submit your artifacts, and ship.
+    </p>
+
+    <ul class="rb-landing__steps" id="landing-steps">
+      <!-- Rendered by JS -->
+    </ul>
+
+    <div style="margin-top: var(--kn-space-3);">
+      <a href="rb/01-problem.html" class="kn-btn kn-btn--primary" id="start-btn">Start Step 1 &rarr;</a>
+      <a href="rb/proof.html" class="kn-btn kn-btn--secondary" style="margin-left: var(--kn-space-1);">View Proof</a>
+    </div>
+  </div>
+
+  <script src="rb-engine.js"></script>
+  <script>
+    (function () {
+      var RB = window.RBEngine;
+      var list = document.getElementById('landing-steps');
+      if (!list || !RB) return;
+
+      var html = '';
+      for (var i = 0; i < RB.TOTAL_STEPS; i++) {
+        var meta = RB.STEP_META[i];
+        var stepNum = meta.num;
+        var accessible = RB.canAccessStep(stepNum);
+        var complete = RB.isStepComplete(stepNum);
+
+        html += '<li class="rb-landing__step">';
+        html += '<span>';
+        if (accessible) {
+          html += '<a href="rb/' + meta.slug + '.html">' + stepNum + '. ' + meta.title + '</a>';
+        } else {
+          html += stepNum + '. ' + meta.title;
+        }
+        html += '</span>';
+
+        if (complete) {
+          html += '<span style="color:var(--kn-success);font-weight:500;">Completed</span>';
+        } else if (accessible) {
+          html += '<span style="color:var(--kn-warning);font-weight:500;">Available</span>';
+        } else {
+          html += '<span class="rb-landing__step-locked">&#128274; Locked</span>';
+        }
+        html += '</li>';
+      }
+      list.innerHTML = html;
+    })();
+  </script>
+</body>
+</html>
