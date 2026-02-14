@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Builder — AI Resume Builder</title>
+  <link rel="stylesheet" href="design-system.css">
+  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="resume-app.css">
+</head>
+<body class="resume-app">
+
+  <nav class="resume-nav" role="navigation">
+    <a href="index.html" class="resume-nav__brand">AI Resume Builder</a>
+    <ul class="resume-nav__links">
+      <li><a href="builder.html" class="is-active">Builder</a></li>
+      <li><a href="preview.html">Preview</a></li>
+      <li><a href="proof.html">Proof</a></li>
+    </ul>
+  </nav>
+
+  <div class="resume-builder">
+    <div class="resume-builder__form">
+      <div class="resume-builder__toolbar">
+        <button type="button" class="kn-btn kn-btn--secondary" id="load-sample-btn">Load Sample Data</button>
+      </div>
+
+      <div class="resume-form-section">
+        <h2 class="resume-form-section__title">Personal Info</h2>
+        <div class="resume-form-row">
+          <input type="text" class="kn-input" id="personal-name" placeholder="Full name">
+          <input type="email" class="kn-input" id="personal-email" placeholder="Email">
+        </div>
+        <div class="resume-form-row">
+          <input type="text" class="kn-input" id="personal-phone" placeholder="Phone">
+          <input type="text" class="kn-input" id="personal-location" placeholder="Location">
+        </div>
+      </div>
+
+      <div class="resume-form-section">
+        <h2 class="resume-form-section__title">Summary</h2>
+        <textarea class="kn-input" id="summary" placeholder="Brief professional summary…" rows="4"></textarea>
+      </div>
+
+      <div class="resume-form-section">
+        <h2 class="resume-form-section__title">Education</h2>
+        <ul class="resume-entries" id="education-list"></ul>
+        <div class="resume-form-actions">
+          <button type="button" class="kn-btn kn-btn--secondary" id="add-education">+ Add Education</button>
+        </div>
+      </div>
+
+      <div class="resume-form-section">
+        <h2 class="resume-form-section__title">Experience</h2>
+        <ul class="resume-entries" id="experience-list"></ul>
+        <div class="resume-form-actions">
+          <button type="button" class="kn-btn kn-btn--secondary" id="add-experience">+ Add Experience</button>
+        </div>
+      </div>
+
+      <div class="resume-form-section">
+        <h2 class="resume-form-section__title">Projects</h2>
+        <ul class="resume-entries" id="projects-list"></ul>
+        <div class="resume-form-actions">
+          <button type="button" class="kn-btn kn-btn--secondary" id="add-project">+ Add Project</button>
+        </div>
+      </div>
+
+      <div class="resume-form-section">
+        <h2 class="resume-form-section__title">Skills</h2>
+        <input type="text" class="kn-input" id="skills" placeholder="Comma-separated, e.g. JavaScript, React, Node.js">
+      </div>
+
+      <div class="resume-form-section">
+        <h2 class="resume-form-section__title">Links</h2>
+        <div class="resume-form-row resume-form-row--single">
+          <input type="url" class="kn-input" id="link-github" placeholder="GitHub URL">
+        </div>
+        <div class="resume-form-row resume-form-row--single">
+          <input type="url" class="kn-input" id="link-linkedin" placeholder="LinkedIn URL">
+        </div>
+      </div>
+    </div>
+
+    <aside class="resume-builder__preview">
+      <div id="live-preview"></div>
+    </aside>
+  </div>
+
+  <script src="resume-app.js"></script>
+  <script>
+    (function () {
+      var RA = window.ResumeApp;
+      if (!RA) return;
+
+      var previewEl = document.getElementById('live-preview');
+
+      function getDataFromForm() {
+        var data = RA.getEmptyResume();
+        data.personal.name = (document.getElementById('personal-name') && document.getElementById('personal-name').value) || '';
+        data.personal.email = (document.getElementById('personal-email') && document.getElementById('personal-email').value) || '';
+        data.personal.phone = (document.getElementById('personal-phone') && document.getElementById('personal-phone').value) || '';
+        data.personal.location = (document.getElementById('personal-location') && document.getElementById('personal-location').value) || '';
+        data.summary = (document.getElementById('summary') && document.getElementById('summary').value) || '';
+        data.skills = (document.getElementById('skills') && document.getElementById('skills').value) || '';
+        data.links.github = (document.getElementById('link-github') && document.getElementById('link-github').value) || '';
+        data.links.linkedin = (document.getElementById('link-linkedin') && document.getElementById('link-linkedin').value) || '';
+        data.education = getEducationFromForm();
+        data.experience = getExperienceFromForm();
+        data.projects = getProjectsFromForm();
+        return data;
+      }
+
+      function getEducationFromForm() {
+        var items = [];
+        document.querySelectorAll('#education-list .resume-entry').forEach(function (el) {
+          items.push({
+            degree: (el.querySelector('.ed-degree') && el.querySelector('.ed-degree').value) || '',
+            school: (el.querySelector('.ed-school') && el.querySelector('.ed-school').value) || '',
+            location: (el.querySelector('.ed-location') && el.querySelector('.ed-location').value) || '',
+            year: (el.querySelector('.ed-year') && el.querySelector('.ed-year').value) || ''
+          });
+        });
+        return items;
+      }
+
+      function getExperienceFromForm() {
+        var items = [];
+        document.querySelectorAll('#experience-list .resume-entry').forEach(function (el) {
+          items.push({
+            title: (el.querySelector('.exp-title') && el.querySelector('.exp-title').value) || '',
+            company: (el.querySelector('.exp-company') && el.querySelector('.exp-company').value) || '',
+            location: (el.querySelector('.exp-location') && el.querySelector('.exp-location').value) || '',
+            period: (el.querySelector('.exp-period') && el.querySelector('.exp-period').value) || '',
+            description: (el.querySelector('.exp-desc') && el.querySelector('.exp-desc').value) || ''
+          });
+        });
+        return items;
+      }
+
+      function getProjectsFromForm() {
+        var items = [];
+        document.querySelectorAll('#projects-list .resume-entry').forEach(function (el) {
+          items.push({
+            name: (el.querySelector('.proj-name') && el.querySelector('.proj-name').value) || '',
+            description: (el.querySelector('.proj-desc') && el.querySelector('.proj-desc').value) || '',
+            link: (el.querySelector('.proj-link') && el.querySelector('.proj-link').value) || ''
+          });
+        });
+        return items;
+      }
+
+      function setFormFromData(data) {
+        var p = data.personal || {};
+        setVal('personal-name', p.name);
+        setVal('personal-email', p.email);
+        setVal('personal-phone', p.phone);
+        setVal('personal-location', p.location);
+        setVal('summary', data.summary || '');
+        setVal('skills', data.skills || '');
+        setVal('link-github', (data.links && data.links.github) || '');
+        setVal('link-linkedin', (data.links && data.links.linkedin) || '');
+        renderEducationList(data.education || []);
+        renderExperienceList(data.experience || []);
+        renderProjectsList(data.projects || []);
+      }
+
+      function setVal(id, val) {
+        var el = document.getElementById(id);
+        if (el) el.value = val;
+      }
+
+      function renderEducationList(items) {
+        var list = document.getElementById('education-list');
+        if (!list) return;
+        list.innerHTML = '';
+        (items.length ? items : [{ degree: '', school: '', location: '', year: '' }]).forEach(function (e, i) {
+          var li = document.createElement('li');
+          li.className = 'resume-entry';
+          li.innerHTML = '<div class="resume-entry__row"><input type="text" class="kn-input ed-degree" placeholder="Degree"><input type="text" class="kn-input ed-school" placeholder="School"></div>' +
+            '<div class="resume-entry__row"><input type="text" class="kn-input ed-location" placeholder="Location"><input type="text" class="kn-input ed-year" placeholder="Year"></div>' +
+            '<div class="resume-entry__actions"><button type="button" class="kn-btn kn-btn--secondary remove-ed">Remove</button></div>';
+          li.querySelector('.ed-degree').value = e.degree || '';
+          li.querySelector('.ed-school').value = e.school || '';
+          li.querySelector('.ed-location').value = e.location || '';
+          li.querySelector('.ed-year').value = e.year || '';
+          list.appendChild(li);
+        });
+        bindListEvents('education-list', '.remove-ed', renderEducationList, getEducationFromForm, addEducationRow);
+      }
+
+      function addEducationRow() {
+        var list = document.getElementById('education-list');
+        if (!list) return;
+        var items = getEducationFromForm();
+        items.push({ degree: '', school: '', location: '', year: '' });
+        renderEducationList(items);
+        sync();
+      }
+
+      function renderExperienceList(items) {
+        var list = document.getElementById('experience-list');
+        if (!list) return;
+        list.innerHTML = '';
+        (items.length ? items : [{ title: '', company: '', location: '', period: '', description: '' }]).forEach(function (e) {
+          var li = document.createElement('li');
+          li.className = 'resume-entry';
+          li.innerHTML = '<div class="resume-entry__row"><input type="text" class="kn-input exp-title" placeholder="Job title"><input type="text" class="kn-input exp-company" placeholder="Company"></div>' +
+            '<div class="resume-entry__row"><input type="text" class="kn-input exp-location" placeholder="Location"><input type="text" class="kn-input exp-period" placeholder="Period"></div>' +
+            '<div class="resume-entry__row resume-entry__row--full"><textarea class="kn-input exp-desc" placeholder="Description" rows="2"></textarea></div>' +
+            '<div class="resume-entry__actions"><button type="button" class="kn-btn kn-btn--secondary remove-exp">Remove</button></div>';
+          li.querySelector('.exp-title').value = e.title || '';
+          li.querySelector('.exp-company').value = e.company || '';
+          li.querySelector('.exp-location').value = e.location || '';
+          li.querySelector('.exp-period').value = e.period || '';
+          li.querySelector('.exp-desc').value = e.description || '';
+          list.appendChild(li);
+        });
+        bindListEvents('experience-list', '.remove-exp', renderExperienceList, getExperienceFromForm, addExperienceRow);
+      }
+
+      function addExperienceRow() {
+        var items = getExperienceFromForm();
+        items.push({ title: '', company: '', location: '', period: '', description: '' });
+        renderExperienceList(items);
+        sync();
+      }
+
+      function renderProjectsList(items) {
+        var list = document.getElementById('projects-list');
+        if (!list) return;
+        list.innerHTML = '';
+        (items.length ? items : [{ name: '', description: '', link: '' }]).forEach(function (e) {
+          var li = document.createElement('li');
+          li.className = 'resume-entry';
+          li.innerHTML = '<div class="resume-entry__row resume-entry__row--full"><input type="text" class="kn-input proj-name" placeholder="Project name"></div>' +
+            '<div class="resume-entry__row resume-entry__row--full"><textarea class="kn-input proj-desc" placeholder="Description" rows="2"></textarea></div>' +
+            '<div class="resume-entry__row resume-entry__row--full"><input type="url" class="kn-input proj-link" placeholder="Link (optional)"></div>' +
+            '<div class="resume-entry__actions"><button type="button" class="kn-btn kn-btn--secondary remove-proj">Remove</button></div>';
+          li.querySelector('.proj-name').value = e.name || '';
+          li.querySelector('.proj-desc').value = e.description || '';
+          li.querySelector('.proj-link').value = e.link || '';
+          list.appendChild(li);
+        });
+        bindListEvents('projects-list', '.remove-proj', renderProjectsList, getProjectsFromForm, addProjectRow);
+      }
+
+      function addProjectRow() {
+        var items = getProjectsFromForm();
+        items.push({ name: '', description: '', link: '' });
+        renderProjectsList(items);
+        sync();
+      }
+
+      function bindListEvents(listId, removeSelector, renderFn, getItemsFn, addFn) {
+        var list = document.getElementById(listId);
+        if (!list) return;
+        list.querySelectorAll(removeSelector).forEach(function (btn) {
+          btn.onclick = function () {
+            var items = getItemsFn();
+            if (items.length <= 1) return;
+            var idx = Array.prototype.indexOf.call(list.children, btn.closest('.resume-entry'));
+            items.splice(idx, 1);
+            renderFn(items);
+            sync();
+          };
+        });
+        list.querySelectorAll('input, textarea').forEach(function (input) {
+          input.oninput = sync;
+        });
+      }
+
+      function sync() {
+        var data = getDataFromForm();
+        RA.setResumeData(data);
+        RA.renderLivePreview(data, previewEl);
+      }
+
+      document.getElementById('add-education').onclick = addEducationRow;
+      document.getElementById('add-experience').onclick = addExperienceRow;
+      document.getElementById('add-project').onclick = addProjectRow;
+
+      ['personal-name', 'personal-email', 'personal-phone', 'personal-location', 'summary', 'skills', 'link-github', 'link-linkedin'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.oninput = sync;
+      });
+
+      document.getElementById('load-sample-btn').onclick = function () {
+        var sample = RA.getSampleResume();
+        RA.setResumeData(sample);
+        setFormFromData(sample);
+        RA.renderLivePreview(sample, previewEl);
+      };
+
+      setFormFromData(RA.getResumeData());
+      RA.renderLivePreview(RA.getResumeData(), previewEl);
+    })();
+  </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Resume Builder</title>
+  <title>Preview — AI Resume Builder</title>
   <link rel="stylesheet" href="design-system.css">
   <link rel="stylesheet" href="app.css">
   <link rel="stylesheet" href="resume-app.css">
@@ -14,21 +14,23 @@
     <a href="index.html" class="resume-nav__brand">AI Resume Builder</a>
     <ul class="resume-nav__links">
       <li><a href="builder.html">Builder</a></li>
-      <li><a href="preview.html">Preview</a></li>
+      <li><a href="preview.html" class="is-active">Preview</a></li>
       <li><a href="proof.html">Proof</a></li>
     </ul>
   </nav>
 
-  <main class="resume-home">
-    <h1 class="resume-home__headline">Build a Resume That Gets Read.</h1>
-    <p class="resume-home__sub">Structure your experience, skills, and projects. See a clean preview. No clutter—just premium typography and clarity.</p>
-    <div class="resume-home__cta">
-      <a href="builder.html" class="kn-btn kn-btn--primary">Start Building</a>
-    </div>
-    <p class="resume-home__footer">
-      <a href="rb/01-problem.html">Project 3 Build Track</a>
-    </p>
+  <main class="resume-preview-page">
+    <div id="preview-content"></div>
   </main>
 
+  <script src="resume-app.js"></script>
+  <script>
+    (function () {
+      var RA = window.ResumeApp;
+      if (RA && document.getElementById('preview-content')) {
+        RA.renderPreviewPage(document.getElementById('preview-content'));
+      }
+    })();
+  </script>
 </body>
 </html>
