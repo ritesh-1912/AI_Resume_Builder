@@ -63,21 +63,6 @@
       <p class="preview-export-warning" id="export-warning" aria-live="polite" hidden></p>
     </div>
     <div id="preview-content" class="preview-print-area"></div>
-    <details class="test-checklist no-print" id="test-checklist">
-      <summary class="test-checklist__summary">Test checklist (10 items)</summary>
-      <ul class="test-checklist__list" aria-label="Feature test checklist">
-        <li><label><input type="checkbox" class="test-checklist__cb"> All form sections save to localStorage</label></li>
-        <li><label><input type="checkbox" class="test-checklist__cb"> Live preview updates in real-time</label></li>
-        <li><label><input type="checkbox" class="test-checklist__cb"> Template switching preserves data</label></li>
-        <li><label><input type="checkbox" class="test-checklist__cb"> Color theme persists after refresh</label></li>
-        <li><label><input type="checkbox" class="test-checklist__cb"> ATS score calculates correctly</label></li>
-        <li><label><input type="checkbox" class="test-checklist__cb"> Score updates live on edit</label></li>
-        <li><label><input type="checkbox" class="test-checklist__cb"> Export buttons work (copy/download)</label></li>
-        <li><label><input type="checkbox" class="test-checklist__cb"> Empty states handled gracefully</label></li>
-        <li><label><input type="checkbox" class="test-checklist__cb"> Mobile responsive layout works</label></li>
-        <li><label><input type="checkbox" class="test-checklist__cb"> No console errors on any page</label></li>
-      </ul>
-    </details>
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   </main>
 
@@ -142,31 +127,6 @@
           }).join('');
         }
       }
-
-      var CHECKLIST_KEY = 'rb_checklist';
-
-      function loadChecklist() {
-        try {
-          var raw = localStorage.getItem(CHECKLIST_KEY);
-          var arr = raw ? JSON.parse(raw) : [];
-          var cbs = document.querySelectorAll('.test-checklist__cb');
-          for (var i = 0; i < cbs.length; i++) {
-            cbs[i].checked = !!arr[i];
-          }
-        } catch (e) {}
-      }
-
-      function saveChecklist() {
-        var cbs = document.querySelectorAll('.test-checklist__cb');
-        var arr = [];
-        for (var i = 0; i < cbs.length; i++) arr.push(cbs[i].checked);
-        try { localStorage.setItem(CHECKLIST_KEY, JSON.stringify(arr)); } catch (e) {}
-      }
-
-      loadChecklist();
-      document.querySelectorAll('.test-checklist__cb').forEach(function (cb) {
-        cb.addEventListener('change', saveChecklist);
-      });
 
       applyTemplate(RA.getTemplate());
       applyTheme(RA.getThemeColor());
