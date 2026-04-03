@@ -36,7 +36,3 @@ The repo is set up for Vercel with `outputDirectory: "design-system"`. Routes: `
 - `resumeBuilderData` — Resume content (personal, summary, education, experience, projects, skills, links).
 - `resumeBuilderTemplate` — `classic` | `modern` | `minimal`.
 - `resumeBuilderThemeColor` — `teal` | `navy` | `burgundy` | `forest` | `charcoal`.
-
-## License
-
-MIT (or as specified in the repo).
